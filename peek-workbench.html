@@ -247,6 +247,14 @@
     transition: all 0.15s; box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   }
   #export-btn:hover { background: linear-gradient(to bottom, #3a703a, #2a5a2a); color: #ccffdd; border-color: #55aa55; }
+  #preview-export-btn {
+    padding: 7px 6px;
+    background: linear-gradient(to bottom, #3a3a5a, #2a2a44); color: #ccccff;
+    border: 1px solid #555577; border-radius: 5px; cursor: pointer;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    transition: all 0.15s; box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  #preview-export-btn:hover { background: linear-gradient(to bottom, #4a4a6a, #3a3a54); color: #ddddff; border-color: #7777aa; }
   #json-btns { display: flex; gap: 6px; margin-top: 6px; }
   #json-btns button {
     flex: 1; padding: 6px 4px;
@@ -291,6 +299,11 @@
     position: absolute;
     width: 100%; height: 100%;
   }
+  .box3d-body {
+    transform-style: preserve-3d;
+    position: absolute;
+    width: 100%; height: 100%;
+  }
 
   /* Volumetric glow under box */
   .box3d-spin::after {
@@ -330,6 +343,15 @@
   }
   .pane3d:hover { outline: 2px solid rgba(255,255,0,0.4); outline-offset: -2px; }
   .pane3d.selected { outline: 2px solid #ff0; outline-offset: -2px; z-index: 10; }
+  .pane3d.multi-selected { outline: 2px solid rgba(100,200,255,0.8); outline-offset: -2px; z-index: 9; }
+  .pane3d.selected.multi-selected { outline: 2px solid #ff0; }
+  .pane-item.multi-selected { border-color: #4ac; background: #1a2a2e; }
+  .pane-item.selected.multi-selected { border-color: #ff0; }
+  #lasso-rect {
+    position: absolute; border: 1px dashed rgba(100,200,255,0.7);
+    background: rgba(100,200,255,0.08); pointer-events: none; z-index: 1000; display: none;
+  }
+  .sel-badge { display: inline-block; margin-left: 6px; font-size: 9px; color: #4ac; }
 
   /* Pane labels */
   .pane-label {
@@ -358,7 +380,6 @@
   .lid-wrapper {
     position: absolute;
     transform-style: preserve-3d;
-    transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
   }
 
   /* State bar */
@@ -631,7 +652,9 @@
 <body>
 
 <div id="sidebar">
-  <h1>BoxForge <span style="color:#666;font-size:11px;">v1.0</span></h1>
+  <h1 style="display:flex;align-items:center;gap:8px">BoxForge <span style="color:#666;font-size:11px;">v2.0</span>
+    <button id="undo-btn" title="Undo (Ctrl+Z)" style="margin-left:auto;padding:3px 10px;font-size:11px;font-weight:700;background:#1a1a28;color:#666;border:1px solid #333;border-radius:4px;cursor:pointer;letter-spacing:0.3px">Undo</button>
+  </h1>
 
   <div class="section-head">Templates</div>
   <div class="tpl-bar" id="templates"></div>
@@ -720,6 +743,11 @@
       <input type="range" data-pp="oy" min="-350" max="350" value="0">
       <input type="number" class="num" data-pp="oy" value="0">
     </div>
+    <div class="cr">
+      <label>Offset Z</label>
+      <input type="range" data-pp="oz" min="-300" max="300" value="0">
+      <input type="number" class="num" data-pp="oz" value="0">
+    </div>
     <div class="snap-row">
       <label>Snap</label>
       <button id="snap-toggle" class="snap-toggle" title="Toggle corner snapping">OFF</button>
@@ -789,6 +817,21 @@
       <label>Radius %</label>
       <input type="range" data-pp="borderRadius" min="0" max="50" value="0">
       <input type="number" class="num" data-pp="borderRadius" value="0">
+    </div>
+    <div class="cr">
+      <label>Rot X (deg)</label>
+      <input type="range" data-pp="rotX" min="-180" max="180" value="0">
+      <input type="number" class="num" data-pp="rotX" value="0">
+    </div>
+    <div class="cr">
+      <label>Rot Y (deg)</label>
+      <input type="range" data-pp="rotY" min="-180" max="180" value="0">
+      <input type="number" class="num" data-pp="rotY" value="0">
+    </div>
+    <div class="cr">
+      <label>Rot Z (deg)</label>
+      <input type="range" data-pp="rotZ" min="-180" max="180" value="0">
+      <input type="number" class="num" data-pp="rotZ" value="0">
     </div>
     <div class="cr">
       <label>Spin X (deg/s)</label>
@@ -931,6 +974,37 @@
         <option value="circle">Circle</option>
       </select>
     </div>
+    <div style="border-top:1px solid #2a2a3a;margin-top:4px;padding-top:4px">
+      <span style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px">Glow Child <span style="color:#555">(per-phase emoji/sprite)</span></span>
+      <div class="cr" style="margin-top:4px">
+        <label>Content</label>
+        <input type="text" id="gc-text" placeholder="🪙 emoji or text" style="flex:1;background:#222;border:1px solid #444;color:#ddd;padding:2px 6px;border-radius:3px;font-size:13px">
+        <button id="gc-toggle" style="padding:2px 8px;font-size:10px;background:#1a1a28;color:#777;border:1px solid #2a2a3a;border-radius:3px;cursor:pointer" title="Enable/disable glow child">Off</button>
+      </div>
+      <div id="gc-phase-props" style="display:none">
+        <div style="font-size:9px;color:#555;margin:4px 0 2px;letter-spacing:0.5px">P1 <span style="color:#444">(idle)</span></div>
+        <div class="cr"><label>Size</label><input type="range" data-gc="p1-size" min="0" max="120" value="0"><input type="number" class="num" data-gc="p1-size" value="0"></div>
+        <div class="cr"><label>Offset Y</label><input type="range" data-gc="p1-oy" min="-200" max="200" value="0"><input type="number" class="num" data-gc="p1-oy" value="0"></div>
+        <div class="cr"><label>Offset Z</label><input type="range" data-gc="p1-oz" min="-200" max="200" value="0"><input type="number" class="num" data-gc="p1-oz" value="0"></div>
+        <div class="cr"><label>Opacity</label><input type="range" data-gc="p1-alpha" min="0" max="100" value="0"><input type="number" class="num" data-gc="p1-alpha" value="0"></div>
+        <div class="cr"><label>Rot X</label><input type="range" data-gc="p1-rotX" min="-180" max="180" value="0"><input type="number" class="num" data-gc="p1-rotX" value="0"></div>
+        <div class="cr"><label>Rot Y</label><input type="range" data-gc="p1-rotY" min="-180" max="180" value="0"><input type="number" class="num" data-gc="p1-rotY" value="0"></div>
+        <div style="font-size:9px;color:#555;margin:4px 0 2px;letter-spacing:0.5px">P2 <span style="color:#444">(hover)</span></div>
+        <div class="cr"><label>Size</label><input type="range" data-gc="p2-size" min="0" max="120" value="24"><input type="number" class="num" data-gc="p2-size" value="24"></div>
+        <div class="cr"><label>Offset Y</label><input type="range" data-gc="p2-oy" min="-200" max="200" value="0"><input type="number" class="num" data-gc="p2-oy" value="0"></div>
+        <div class="cr"><label>Offset Z</label><input type="range" data-gc="p2-oz" min="-200" max="200" value="0"><input type="number" class="num" data-gc="p2-oz" value="0"></div>
+        <div class="cr"><label>Opacity</label><input type="range" data-gc="p2-alpha" min="0" max="100" value="50"><input type="number" class="num" data-gc="p2-alpha" value="50"></div>
+        <div class="cr"><label>Rot X</label><input type="range" data-gc="p2-rotX" min="-180" max="180" value="0"><input type="number" class="num" data-gc="p2-rotX" value="0"></div>
+        <div class="cr"><label>Rot Y</label><input type="range" data-gc="p2-rotY" min="-180" max="180" value="0"><input type="number" class="num" data-gc="p2-rotY" value="0"></div>
+        <div style="font-size:9px;color:#555;margin:4px 0 2px;letter-spacing:0.5px">P3 <span style="color:#444">(open)</span></div>
+        <div class="cr"><label>Size</label><input type="range" data-gc="p3-size" min="0" max="120" value="40"><input type="number" class="num" data-gc="p3-size" value="40"></div>
+        <div class="cr"><label>Offset Y</label><input type="range" data-gc="p3-oy" min="-200" max="200" value="-60"><input type="number" class="num" data-gc="p3-oy" value="-60"></div>
+        <div class="cr"><label>Offset Z</label><input type="range" data-gc="p3-oz" min="-200" max="200" value="30"><input type="number" class="num" data-gc="p3-oz" value="30"></div>
+        <div class="cr"><label>Opacity</label><input type="range" data-gc="p3-alpha" min="0" max="100" value="100"><input type="number" class="num" data-gc="p3-alpha" value="100"></div>
+        <div class="cr"><label>Rot X</label><input type="range" data-gc="p3-rotX" min="-180" max="180" value="0"><input type="number" class="num" data-gc="p3-rotX" value="0"></div>
+        <div class="cr"><label>Rot Y</label><input type="range" data-gc="p3-rotY" min="-180" max="180" value="0"><input type="number" class="num" data-gc="p3-rotY" value="0"></div>
+      </div>
+    </div>
   </div>
   </div><!-- /glow-section -->
 
@@ -946,13 +1020,35 @@
     </div>
     <div style="border-top:1px solid #2a2a3a;padding-top:4px">
       <span style="font-size:9px;color:#666;text-transform:uppercase;letter-spacing:0.5px">Phase Anims <span style="color:#555">(per-phase, exports)</span></span>
-      <div id="phase-anim-sidebar" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:3px">
-        <button class="pa-toggle" data-anim="squish" title="Toggle squish on this phase">Squish</button>
-        <button class="pa-toggle" data-anim="bounce" title="Toggle bounce on this phase">Bounce</button>
-        <button class="pa-toggle" data-anim="poke" title="Toggle poke on this phase">Poke</button>
-        <button class="pa-toggle" data-anim="spin" title="Toggle spin on this phase">Spin</button>
-        <button class="pa-toggle" data-anim="tilt" title="Toggle tilt orbit on this phase">Tilt</button>
-        <button class="pa-toggle" data-anim="glow" title="Toggle glow plane on this phase">Glow</button>
+      <div id="phase-anim-sidebar" style="display:flex;flex-direction:column;gap:3px;margin-top:3px">
+        <div class="pa-row" data-anim="squish" style="display:flex;align-items:center;gap:4px">
+          <button class="pa-toggle" data-anim="squish" title="Toggle squish on this phase" style="width:58px">Squish</button>
+          <input type="range" class="pa-slider" data-anim="squish" min="0" max="100" value="0" style="flex:1;height:14px">
+          <span class="pa-val" data-anim="squish" style="font-size:10px;color:#888;width:28px;text-align:right">0</span>
+        </div>
+        <div class="pa-row" data-anim="bounce" style="display:flex;align-items:center;gap:4px">
+          <button class="pa-toggle" data-anim="bounce" title="Toggle bounce on this phase" style="width:58px">Bounce</button>
+          <input type="range" class="pa-slider" data-anim="bounce" min="0" max="100" value="0" style="flex:1;height:14px">
+          <span class="pa-val" data-anim="bounce" style="font-size:10px;color:#888;width:28px;text-align:right">0</span>
+        </div>
+        <div class="pa-row" data-anim="poke" style="display:flex;align-items:center;gap:4px">
+          <button class="pa-toggle" data-anim="poke" title="Toggle poke on this phase" style="width:58px">Poke</button>
+          <input type="range" class="pa-slider" data-anim="poke" min="0" max="100" value="0" style="flex:1;height:14px">
+          <span class="pa-val" data-anim="poke" style="font-size:10px;color:#888;width:28px;text-align:right">0</span>
+        </div>
+        <div class="pa-row" data-anim="spin" style="display:flex;align-items:center;gap:4px">
+          <button class="pa-toggle" data-anim="spin" title="Toggle spin on this phase" style="width:58px">Spin</button>
+          <input type="range" class="pa-slider" data-anim="spin" min="0" max="100" value="0" style="flex:1;height:14px">
+          <span class="pa-val" data-anim="spin" style="font-size:10px;color:#888;width:28px;text-align:right">0</span>
+        </div>
+        <div class="pa-row" data-anim="tilt" style="display:flex;align-items:center;gap:4px">
+          <button class="pa-toggle" data-anim="tilt" title="Toggle tilt orbit on this phase" style="width:58px">Tilt</button>
+          <input type="range" class="pa-slider" data-anim="tilt" min="0" max="100" value="0" style="flex:1;height:14px">
+          <span class="pa-val" data-anim="tilt" style="font-size:10px;color:#888;width:28px;text-align:right">0</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px">
+          <button class="pa-toggle" data-anim="glow" title="Toggle glow plane on this phase">Glow</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1093,7 +1189,10 @@
   </div>
 
   <div id="export-area">
-    <button id="export-btn">Export CSS</button>
+    <div style="display:flex;gap:6px">
+      <button id="export-btn" style="flex:2">Export CSS</button>
+      <button id="preview-export-btn" style="flex:1">Preview</button>
+    </div>
     <div id="json-btns">
       <button id="json-save-btn">💾 Save JSON</button>
       <button id="json-load-btn">📂 Load JSON</button>
@@ -1103,7 +1202,8 @@
   </div>
 </div>
 
-<div id="preview-area">
+<div id="preview-area" style="position:relative">
+  <div id="lasso-rect"></div>
   <div class="horizon-line" id="horizon-line"></div>
   <div id="state-bar">
     <button data-state="closed" class="active">Phase 1 · Idle</button>
@@ -1115,12 +1215,14 @@
   <div class="box3d-wrap" id="box">
     <div class="box3d-scene" id="scene">
       <div class="box3d-spin" id="spin">
-        <div class="box3d-glow">
-          <div class="glow-plane gp0"></div>
-          <div class="glow-plane gp1"></div>
-          <div class="glow-plane gp2"></div>
+        <div class="box3d-body" id="body-anim">
+          <div class="box3d-glow">
+            <div class="glow-plane gp0"></div>
+            <div class="glow-plane gp1"></div>
+            <div class="glow-plane gp2"></div>
+          </div>
+          <!-- Panes are rendered here dynamically -->
         </div>
-        <!-- Panes are rendered here dynamically -->
       </div>
     </div>
   </div>
@@ -1150,6 +1252,38 @@
 (function() {
   'use strict';
 
+  // ╔════════════════════════════════════════════════════════════════════╗
+  // ║  BOXFORGE — CSS 3D Box Geometry Editor                           ║
+  // ║                                                                   ║
+  // ║  SECTION INDEX (search for ═══ + section name):                   ║
+  // ║    DATA MODEL ............... state: shell, panes, glows, orb     ║
+  // ║    DATA MODEL FACADE (M) .... property proxies for new code       ║
+  // ║    TEMPLATES ................ built-in box presets                 ║
+  // ║    INPUT WIRING ............. slider/select event handlers        ║
+  // ║    SELECTION STATE .......... Sel multi-select manager (Sel)       ║
+  // ║    SNAP GRID + ARROW NUDGE .. neighbor-aware snap, keyboard nudge ║
+  // ║    DUPLICATE + DELETE ........ pane management actions            ║
+  // ║    IMPORT / EXPORT .......... CSS export, JSON save/load          ║
+  // ║    TEMPLATE DEFAULTS ........ click-to-revert snapshot system     ║
+  // ║    TEMPLATE REGISTRY ........ built-in snapshots + user templates ║
+  // ║    SELECTION ................ pane/glow select, prop panel sync   ║
+  // ║    RENDERER (R) ............. 3D scene, transforms, textures     ║
+  // ║      ├ structural sizing .... getStructW/H                       ║
+  // ║      ├ dynamic keyframes .... intensity-scaled CSS animations     ║
+  // ║      ├ render() ............. main 3D composition                 ║
+  // ║      ├ orb + pyramid ........ embedded CSS sphere / pyramid       ║
+  // ║      ├ transform helpers .... getFace/Lid/Hinge transforms        ║
+  // ║      ├ texture helpers ...... getTextureBg, getPaneRotSuffix      ║
+  // ║      └ R facade ............ shared API for Exporter, Snap        ║
+  // ║    EXPORTER ................. exportCSS() pipeline                ║
+  // ║    GLOW CONTROLS ............ glow panel wiring + child UI       ║
+  // ║    ORB CONTROLS ............. geodesic sphere panel wiring       ║
+  // ║    PYRAMID CONTROLS ......... pyramid panel wiring               ║
+  // ║    PHASE ANIMATIONS ......... squish/bounce/poke/spin/tilt/glow  ║
+  // ║    COMPOSE BAR .............. orb/pyramid drop-in composability   ║
+  // ║    INIT ..................... boot sequence, first template load  ║
+  // ╚════════════════════════════════════════════════════════════════════╝
+
   // ════════════════════════════════════════════════════
   //  DATA MODEL
   // ════════════════════════════════════════════════════
@@ -1170,6 +1304,27 @@
   var _nextGlowId = 1;
   var selectedGlowId = null;
 
+  function _gcPhase(p, defaults) {
+    p = p || {};
+    return {
+      size:  p.size  != null ? p.size  : defaults.size,
+      oy:    p.oy    != null ? p.oy    : defaults.oy,
+      oz:    p.oz    != null ? p.oz    : defaults.oz,
+      alpha: p.alpha != null ? p.alpha : defaults.alpha,
+      rotX:  p.rotX  != null ? p.rotX  : defaults.rotX,
+      rotY:  p.rotY  != null ? p.rotY  : defaults.rotY
+    };
+  }
+  function makeGlowChild(opts) {
+    opts = opts || {};
+    return {
+      text:  opts.text || '',           // emoji or label text (empty = no child)
+      p1: _gcPhase(opts.p1, { size: 0,  oy: 0,   oz: 0,  alpha: 0,   rotX: 0, rotY: 0 }),
+      p2: _gcPhase(opts.p2, { size: 24, oy: 0,   oz: 0,  alpha: 50,  rotX: 0, rotY: 0 }),
+      p3: _gcPhase(opts.p3, { size: 40, oy: -60, oz: 30, alpha: 100, rotX: 0, rotY: 0 })
+    };
+  }
+
   function makeGlow(opts) {
     return {
       id:      opts.id || (_nextGlowId++),
@@ -1185,7 +1340,8 @@
       spinX:   opts.spinX || 0,          // continuous spin speed X (deg/s, 0=off)
       spinY:   opts.spinY || 0,          // continuous spin speed Y
       blur:    opts.blur != null ? opts.blur : 18,
-      shape:   opts.shape || 'ellipse'   // 'ellipse' or 'circle'
+      shape:   opts.shape || 'ellipse',  // 'ellipse' or 'circle'
+      child:   opts.child ? makeGlowChild(opts.child) : null   // per-phase emoji/sprite child
     };
   }
 
@@ -1198,9 +1354,71 @@
     ];
   }
 
+  // ════════════════════════════════════════════════════
+  //  SELECTION STATE
+  //  Multi-select with backward-compat shim.
+  //  Sel._ids = Set of selected pane IDs
+  //  Sel._primary = the "anchor" pane shown in property panel
+  //  selectedPaneId = getter alias for Sel._primary (legacy compat)
+  // ════════════════════════════════════════════════════
+
+  var Sel = {
+    _ids: {},          // object used as set: { id: true }
+    _primary: null,    // ID of the anchor pane (shown in prop panel)
+
+    // Replace entire selection with one ID (normal click)
+    set: function(id) {
+      Sel._ids = {};
+      if (id != null) Sel._ids[id] = true;
+      Sel._primary = id;
+    },
+
+    // Toggle an ID in/out (Shift+click)
+    toggle: function(id) {
+      if (Sel._ids[id]) {
+        delete Sel._ids[id];
+        // If we removed the primary, pick another or null
+        if (Sel._primary === id) {
+          var keys = Object.keys(Sel._ids);
+          Sel._primary = keys.length ? +keys[0] : null;
+        }
+      } else {
+        Sel._ids[id] = true;
+        if (Sel._primary == null) Sel._primary = id;
+      }
+    },
+
+    // Add multiple IDs (lasso result)
+    addAll: function(ids) {
+      ids.forEach(function(id) { Sel._ids[id] = true; });
+      if (Sel._primary == null && ids.length) Sel._primary = ids[0];
+    },
+
+    // Clear entire selection
+    clear: function() {
+      Sel._ids = {};
+      Sel._primary = null;
+    },
+
+    // Check membership
+    has: function(id) { return !!Sel._ids[id]; },
+
+    // Get all selected IDs as array
+    all: function() { return Object.keys(Sel._ids).map(Number); },
+
+    // Count
+    count: function() { return Object.keys(Sel._ids).length; },
+
+    // Is multi-select active? (more than 1 selected)
+    isMulti: function() { return Sel.count() > 1; }
+  };
+
+  // Legacy compat — all existing code that reads/writes selectedPaneId keeps working
   var selectedPaneId = null;
+  // We sync selectedPaneId from Sel._primary via a helper called after any selection change:
+  function _syncSelCompat() { selectedPaneId = Sel._primary; }
+
   var currentState = 'closed';
-  // _displaySpin/_displayTilt removed — spin/tilt now live in phaseAnims per-phase
 
   // ════════════════════════════════════════════════════
   //  ORB CONFIG (embedded CSS sphere)
@@ -1226,19 +1444,18 @@
   var _savedOrb = null;    // Clipboard for save/drop-in composability
 
   // Per-phase animation toggles (template-level, apply to the whole box wrapper)
-  // Each phase has boolean toggles for: squish, bounce, poke (body anims)
-  // and spin, tilt, glow (display anims that also export)
+  // Values are 0–100 intensity (0 = off). spin/tilt/glow remain boolean-like (0 or 100).
   var phaseAnims = {
-    p1: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: false },
-    p2: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: false },
-    p3: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: false }
+    p1: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+    p2: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+    p3: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 }
   };
 
   function defaultPhaseAnims() {
     return {
-      p1: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: false },
-      p2: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: false },
-      p3: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: false }
+      p1: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+      p2: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+      p3: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 }
     };
   }
 
@@ -1332,12 +1549,16 @@
       ph:       opts.ph || 200,               // pane height
       ox:       opts.ox || 0,                 // offset along face X axis
       oy:       opts.oy || 0,                 // offset along face Y axis
+      oz:       opts.oz || 0,                 // offset along face Z axis (depth push/pull)
       hinge:    opts.hinge || 'bottom',       // lid hinge edge
       angle:    opts.angle || 135,            // lid open angle
       hoverAngle: opts.hoverAngle != null ? opts.hoverAngle : 25,  // hover preview angle
       color:    opts.color || colors.cLight,
       alpha:    opts.alpha != null ? opts.alpha : 100,
       borderRadius: opts.borderRadius != null ? opts.borderRadius : 0,
+      rotX:     opts.rotX || 0,              // static rotation X in degrees
+      rotY:     opts.rotY || 0,              // static rotation Y in degrees
+      rotZ:     opts.rotZ || 0,              // static rotation Z in degrees
       spinX:    opts.spinX || 0,             // continuous spin X in deg/s (0=off)
       spinY:    opts.spinY || 0,             // continuous spin Y in deg/s
       texture:  opts.texture || 'gradient',
@@ -1364,6 +1585,66 @@
   panes = defaultPanes();
 
   // ════════════════════════════════════════════════════
+  //  DATA MODEL FACADE (M)
+  //  Property proxies for all mutable model state.
+  //  Existing code still uses bare vars (shell, panes, etc.).
+  //  New code should prefer M.shell, M.panes, etc.
+  //  Templates + loadProject mutate through bare vars; M reads them live.
+  // ════════════════════════════════════════════════════
+
+  var M = {};
+  (function _defineModelProxy(obj, pairs) {
+    pairs.forEach(function(pair) {
+      var name = pair[0], getter = pair[1], setter = pair[2];
+      Object.defineProperty(obj, name, {
+        get: getter,
+        set: setter,
+        enumerable: true
+      });
+    });
+  })(M, [
+    ['shell',         function() { return shell; },         function(v) { shell = v; }],
+    ['colors',        function() { return colors; },        function(v) { colors = v; }],
+    ['panes',         function() { return panes; },         function(v) { panes = v; }],
+    ['glows',         function() { return glows; },         function(v) { glows = v; }],
+    ['orbConfig',     function() { return orbConfig; },     function(v) { orbConfig = v; }],
+    ['pyramidConfig', function() { return pyramidConfig; }, function(v) { pyramidConfig = v; }],
+    ['phaseAnims',    function() { return phaseAnims; },    function(v) { phaseAnims = v; }],
+    ['phaseMode',     function() { return phaseMode; },     function(v) { phaseMode = v; }],
+    ['orbOnly',       function() { return orbOnly; },       function(v) { orbOnly = v; }],
+    ['pyrPrimary',    function() { return pyrPrimary; },    function(v) { pyrPrimary = v; }],
+    ['currentState',  function() { return currentState; },  function(v) { currentState = v; }],
+    ['_nextId',       function() { return _nextId; },       function(v) { _nextId = v; }],
+    ['_nextGlowId',   function() { return _nextGlowId; },  function(v) { _nextGlowId = v; }]
+  ]);
+
+  // Constructor pass-throughs — new code should use M.makePane() etc.
+  M.makePane       = makePane;
+  M.makeGlow       = makeGlow;
+  M.makeGlowChild  = makeGlowChild;
+  M.makeOrbPhase   = makeOrbPhase;
+  M.makePyrPhase   = makePyrPhase;
+  M.defaultPanes   = defaultPanes;
+  M.defaultGlows   = defaultGlows;
+  M.defaultOrbConfig    = defaultOrbConfig;
+  M.defaultPhaseAnims   = defaultPhaseAnims;
+
+  // Lookup helpers (late-bound — getPaneById/getGlowById are declared later in the file)
+  M.getPaneById = function(id) { return getPaneById(id); };
+  M.getGlowById = function(id) { return getGlowById(id); };
+
+  // Constants pass-through
+  M.ORB_PALETTES   = ORB_PALETTES;
+  M.PYR_SHAPES     = PYR_SHAPES;
+  M.ORB_PHASE_KEYS = ORB_PHASE_KEYS;
+  M.PYR_PHASE_KEYS = PYR_PHASE_KEYS;
+
+  // Phase accessors
+  M.activePhaseAnims = activePhaseAnims;
+  M.activeOrbPhase   = activeOrbPhase;
+  M.activePyrPhase   = activePyrPhase;
+
+  // ════════════════════════════════════════════════════
   //  TEMPLATES
   // ════════════════════════════════════════════════════
 
@@ -1375,15 +1656,97 @@
       panes = defaultPanes();
       panes[5].hinge = 'bottom'; panes[5].angle = 135;
     },
+    'Chest': function() {
+      shell = { bw: 510, bh: 193, bd: 114, persp: 352, rx: -30, ry: 0 };
+      colors = { cDark: '#3d2b08', cLight: '#a87830', cFloor: '#1a1206', cCeil: '#5a4020', cGlow: '#ffc850' };
+      _nextId = 1;
+      // NOTE: ox/oy here are PRE-migration (old anchor semantics).
+      // _migrateCentering() runs after, subtracting centering offsets.
+      // Pre-migration values reverse-engineered from the previewed export.
+      panes = [
+        makePane({ id: _nextId++, name: 'Back',   face: 'back',   structural: true }),
+        makePane({ id: _nextId++, name: 'Left',   face: 'left',   structural: true, ox: 143, oy: 1 }),
+        makePane({ id: _nextId++, name: 'Right',  face: 'right',  structural: true, ox: 142 }),
+        makePane({ id: _nextId++, name: 'Bottom', face: 'bottom', structural: true, oy: -19 }),
+        makePane({ id: _nextId++, name: 'Lid',    face: 'top',    role: 'lid', hinge: 'top',
+                   pw: 507, ph: 225, ox: 1.5, oy: -14, oz: 0,
+                   angle: 135, hoverAngle: 25 }),
+        makePane({ id: _nextId++, name: 'Front',  face: 'front',  structural: false, role: 'structure',
+                   pw: 509, ph: 190, ox: 1.5, oy: 0.5 })
+      ];
+      glows = [
+        makeGlow({ name: 'Floor glow',    color: '#c850c6', size: 140, rotX: 90 }),
+        makeGlow({ name: 'Cross glow 1',  color: '#c850c6', size: 140, rotX: 86, rotY: -1 }),
+        makeGlow({ name: 'Cross glow 2',  color: '#c850c6', size: 140, rotY: 60 }),
+        makeGlow({ name: 'Cross glow 3',  color: '#c850c6', size: 140, rotY: 120 }),
+        makeGlow({ name: 'Item.glow',     color: '#ffc850', size: 140, rotY: 68,
+                   child: {
+                     text: '\uD83C\uDF92',
+                     p1: { size: 0,   oy: -50, oz: 0,  alpha: 0,   rotX: 0,  rotY: 0 },
+                     p2: { size: 98,  oy: -39, oz: 9,  alpha: 100, rotX: -4, rotY: -45 },
+                     p3: { size: 120, oy: -139, oz: 30, alpha: 100, rotX: 6,  rotY: -84 }
+                   }
+                 })
+      ];
+      _nextGlowId = glows.length + 1;
+      phaseAnims = {
+        p1: { squish: 4,  bounce: 0, poke: 0,  spin: 0, tilt: 0, glow: 0 },
+        p2: { squish: 8,  bounce: 0, poke: 0,  spin: 0, tilt: 0, glow: 100 },
+        p3: { squish: 0,  bounce: 0, poke: 7,  spin: 0, tilt: 0, glow: 100 }
+      };
+    },
+    'Bookshelf': function() {
+      shell = { bw: 299, bh: 303, bd: 100, persp: 427, rx: -28, ry: 3 };
+      colors = { cDark: '#ffaf0f', cLight: '#472b00', cFloor: '#221d16', cCeil: '#5a4020', cGlow: '#1a00e0' };
+      _nextId = 1;
+      panes = [
+        makePane({ id: _nextId++, name: 'Back',   face: 'back',   structural: true }),
+        makePane({ id: _nextId++, name: 'Left',   face: 'left',   structural: true, ox: 50 }),
+        makePane({ id: _nextId++, name: 'Right',  face: 'right',  structural: true, ox: 49 }),
+        makePane({ id: _nextId++, name: 'Top',    face: 'top',    structural: true, ox: 1, oy: 226, oz: -27 }),
+        makePane({ id: _nextId++, name: 'Bottom', face: 'bottom', structural: true }),
+        makePane({ id: _nextId++, name: 'Lid',    face: 'top',    structural: false, role: 'structure',
+                   pw: 289, ph: 256, ox: 6, oy: 67, oz: -22 })
+      ];
+      glows = [
+        makeGlow({ name: 'Floor glow',   color: '#64c851', size: 140, rotX: 90 }),
+        makeGlow({ name: 'Cross glow 1', color: '#c851a8', size: 140 }),
+        makeGlow({ name: 'Cross glow 2', color: '#516ec8', size: 140, rotY: 60 }),
+        makeGlow({ name: 'Cross glow 3', color: '#e30202', size: 140, rotY: 120 }),
+        makeGlow({ name: 'Item.glow',    color: '#ffc850', size: 140, rotY: 68,
+                   child: {
+                     text: '\uD83D\uDCDA',
+                     p1: { size: 43,  oy: -83, oz: 100, alpha: 50,  rotX: 0, rotY: 0 },
+                     p2: { size: 57,  oy: -25, oz: 64,  alpha: 63,  rotX: 0, rotY: -47 },
+                     p3: { size: 101, oy: -42, oz: 105, alpha: 100, rotX: 9, rotY: -84 }
+                   }
+                 })
+      ];
+      _nextGlowId = glows.length + 1;
+      phaseAnims = {
+        p1: { squish: 0, bounce: 0, poke: 1,  spin: 0, tilt: 0, glow: 0 },
+        p2: { squish: 18, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 100 },
+        p3: { squish: 0, bounce: 0, poke: 11, spin: 0, tilt: 0, glow: 100 }
+      };
+    },
     'Single Door': function() {
-      shell = { bw: 390, bh: 570, bd: 46, persp: 800, rx: -8, ry: 10 };
+      shell = { bw: 390, bh: 586, bd: 46, persp: 502, rx: -11, ry: -15 };
       colors = { cDark: '#0a0a08', cLight: '#3a4030', cFloor: '#1a1812', cCeil: '#2a3020', cGlow: '#dcc8a0' };
       _nextId = 1;
-      panes = defaultPanes();
-      panes[0].texture = 'hidden'; // back hidden for door
-      panes[5].hinge = 'left'; panes[5].angle = 80;
-      panes[5].name = 'Door Panel';
-      panes[5].texture = 'wood-plank';
+      panes = [
+        makePane({ id: _nextId++, name: 'Back',       face: 'back',   structural: true, texture: 'hidden' }),
+        makePane({ id: _nextId++, name: 'Left',       face: 'left',   structural: true, ox: 164, oy: 7 }),
+        makePane({ id: _nextId++, name: 'Right',      face: 'right',  structural: true, ox: 165, oy: 5 }),
+        makePane({ id: _nextId++, name: 'Top',        face: 'top',    structural: true, ox: 14, oy: 252 }),
+        makePane({ id: _nextId++, name: 'Bottom',     face: 'bottom', structural: true, ox: 17, oy: 253 }),
+        makePane({ id: _nextId++, name: 'Door Panel', face: 'front',  role: 'lid', hinge: 'left',
+                   angle: 92, hoverAngle: 41, pw: 390, ph: 564, ox: 15, oy: 6,
+                   texture: 'wood-plank' })
+      ];
+      glows[0].ox = -9; glows[0].oy = 285; glows[0].color = '#ffc850'; glows[0].size = 140;
+      glows[1].size = 140; glows[1].color = '#ffc850';
+      glows[2].size = 89; glows[2].oy = 44; glows[2].oz = -127; glows[2].rotY = 60; glows[2].color = '#ffc850';
+      glows[3].size = 82; glows[3].ox = 1; glows[3].oy = -4; glows[3].oz = -186; glows[3].rotY = 120; glows[3].color = '#ffc850';
     },
     'Double Doors': function() {
       shell = { bw: 600, bh: 570, bd: 46, persp: 800, rx: 5, ry: -7 };
@@ -1410,6 +1773,147 @@
                    labelText: 'to [Floor N]', labelDir: 'ltr', labelSize: 30,
                    wiring: 'Right leaf — mirrors left leaf hinge.' })
       ];
+    },
+    'Crate': function() {
+      shell = { bw: 416, bh: 346, bd: 168, persp: 802, rx: -18, ry: -10 };
+      colors = { cDark: '#5a3a0a', cLight: '#c49a40', cFloor: '#3a2808', cCeil: '#8a6020', cGlow: '#c8a03c' };
+      _nextId = 1;
+      // Pre-migration ox/oy values (reverse-engineered from previewed export).
+      panes = [
+        makePane({ id: _nextId++, name: 'Back',      face: 'back',   structural: true }),
+        makePane({ id: _nextId++, name: 'Left',      face: 'left',   structural: true, ox: 41 }),
+        makePane({ id: _nextId++, name: 'Right',     face: 'right',  structural: true, ox: 40 }),
+        makePane({ id: _nextId++, name: 'Top',       face: 'top',    structural: true, ox: -1, oy: 6 }),
+        makePane({ id: _nextId++, name: 'Bottom',    face: 'bottom', structural: true, oy: -11 }),
+        makePane({ id: _nextId++, name: 'Crate Lid', face: 'front',  role: 'lid', hinge: 'slide-right',
+                   pw: 418, ph: 336, ox: -2, oy: 1, oz: 0,
+                   angle: 104, hoverAngle: 17, texture: 'wood-plank' })
+      ];
+      glows = [
+        makeGlow({ name: 'Floor glow',   color: '#dcc8a0', size: 140, rotX: 90, oz: 119, oy: 164 }),
+        makeGlow({ name: 'Cross glow 1', color: '#dcc8a0', size: 110 }),
+        makeGlow({ name: 'Cross glow 2', color: '#dcc8a0', size: 105, rotY: 60 }),
+        makeGlow({ name: 'Cross glow 3', color: '#dcc8a0', size: 101, rotY: 120 })
+      ];
+      _nextGlowId = glows.length + 1;
+      phaseAnims = {
+        p1: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+        p2: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+        p3: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 100 }
+      };
+    },
+    'Torch': function() {
+      shell = { bw: 200, bh: 140, bd: 50, persp: 800, rx: -22, ry: -18 };
+      colors = { cDark: '#3a2008', cLight: '#c88030', cFloor: '#1a1206', cCeil: '#5a4020', cGlow: '#dca032' };
+      _nextId = 1;
+      panes = defaultPanes();
+      panes[5].hinge = 'bottom'; panes[5].angle = 135;
+    },
+    'Torch (box)': function() {
+      shell = { bw: 120, bh: 120, bd: 60, persp: 600, rx: -12, ry: 15 };
+      colors = { cDark: '#1a0800', cLight: '#ff6600', cFloor: '#0a0400', cCeil: '#cc4400', cGlow: '#ff8833' };
+      _nextId = 1;
+      panes = [
+        makePane({ id: _nextId++, name: 'Back Orb',  face: 'back',   structural: true, borderRadius: 50, color: '#ff4400', alpha: 70 }),
+        makePane({ id: _nextId++, name: 'Left Orb',  face: 'left',   structural: true, borderRadius: 50, color: '#ff6600', alpha: 60 }),
+        makePane({ id: _nextId++, name: 'Right Orb', face: 'right',  structural: true, borderRadius: 50, color: '#ff5500', alpha: 60 }),
+        makePane({ id: _nextId++, name: 'Top Orb',   face: 'top',    structural: true, borderRadius: 50, color: '#ffaa00', alpha: 50 }),
+        makePane({ id: _nextId++, name: 'Bot Orb',   face: 'bottom', structural: true, borderRadius: 50, color: '#cc3300', alpha: 65 }),
+        makePane({ id: _nextId++, name: 'Front Orb', face: 'front',  structural: false, role: 'decor',
+                   pw: 120, ph: 120, ox: 0, oy: 0, borderRadius: 50, color: '#ff8800', alpha: 75, texture: 'solid' }),
+        makePane({ id: _nextId++, name: 'Handle',    face: 'front',  structural: false, role: 'decor',
+                   pw: 20, ph: 160, ox: 0, oy: 140, borderRadius: 0, color: '#3a2010', texture: 'dark-wood',
+                   wiring: 'Handle visible in all states. Texture: dark-wood or biome-default.' }),
+        makePane({ id: _nextId++, name: 'Unlit Cap', face: 'front',  structural: false, role: 'decor',
+                   pw: 40, ph: 40, ox: 0, oy: 0, borderRadius: 0, color: '#0a0a0a', texture: 'solid', alpha: 0,
+                   wiring: 'UNLIT: alpha->100, hide orb panes. Black cube replaces flame.' }),
+        makePane({ id: _nextId++, name: 'Ember Lid', face: 'front',  role: 'lid', hinge: 'bottom', angle: 90, hoverAngle: 15,
+                   pw: 80, ph: 80, ox: 0, oy: 0, borderRadius: 50, color: '#ff4400', alpha: 80,
+                   labelText: '\uD83D\uDD25', labelDir: 'ltr', labelSize: 28,
+                   wiring: 'NOTE: This box template is a low-fidelity stand-in.\n' +
+                           'For the real torch flame, use the CSS sphere from orb-component.html.\n' +
+                           'The orb uses 9 rings x 9 slices (81 circles) for a true geodesic sphere.\n\n' +
+                           'THREE STATES:\n' +
+                           'LIT: orb visible, glow active\n' +
+                           'HOVER/EMBER: orb shrinks, speed 3s, ember-pulse animation\n' +
+                           'UNLIT: orb hidden, show Unlit Cap\n\n' +
+                           'Palettes: fire, ember, ice, poison, arcane, holy (see orb-component.html)' })
+      ];
+    },
+    'Corpse': function() {
+      shell = { bw: 200, bh: 140, bd: 50, persp: 800, rx: -22, ry: -18 };
+      colors = { cDark: '#1a1020', cLight: '#4a3860', cFloor: '#0a0810', cCeil: '#2a2040', cGlow: '#8c64b4' };
+      _nextId = 1;
+      panes = defaultPanes();
+      panes[5].hinge = 'bottom'; panes[5].angle = 135;
+    },
+    'Locked Door': function() {
+      shell = { bw: 260, bh: 380, bd: 90, persp: 800, rx: -8, ry: 10 };
+      colors = { cDark: '#1a0808', cLight: '#8a2020', cFloor: '#0a0404', cCeil: '#3a1010', cGlow: '#dc3c28' };
+      _nextId = 1;
+      panes = defaultPanes();
+      panes[5].hinge = 'left'; panes[5].angle = 0; // locked: doesn't open
+      panes[5].name = 'Locked Panel';
+    },
+    'Boss Door + Orb': function() {
+      shell = { bw: 600, bh: 570, bd: 46, persp: 800, rx: 5, ry: -7 };
+      colors = { cDark: '#1a0404', cLight: '#8a1818', cFloor: '#0a0404', cCeil: '#3a1010', cGlow: '#ff6622' };
+      _nextId = 1;
+      panes = [
+        makePane({ id: _nextId++, name: 'Back',   face: 'back',   structural: true, texture: 'hidden' }),
+        makePane({ id: _nextId++, name: 'Left Jam',  face: 'left',   structural: true, texture: 'stone',
+                   ox: 250, color: '#3a1010', biomeTag: 'dungeon' }),
+        makePane({ id: _nextId++, name: 'Right Jam', face: 'right',  structural: true, texture: 'stone',
+                   ox: 256, color: '#3a1010', biomeTag: 'dungeon' }),
+        makePane({ id: _nextId++, name: 'Lintel', face: 'top',    structural: true, texture: 'boss-red', color: '#5a1818',
+                   oy: 241, biomeTag: 'dungeon' }),
+        makePane({ id: _nextId++, name: 'Sill',   face: 'bottom', structural: true, texture: 'grid-lines', color: '#0a0404',
+                   oy: 240 }),
+        makePane({ id: _nextId++, name: 'Left Door',  face: 'front', role: 'lid', hinge: 'left', angle: 110, hoverAngle: 18,
+                   pw: 300, ph: 570, ox: 0, oy: 0, texture: 'boss-red', color: '#8a1818',
+                   biomeTag: 'dungeon',
+                   labelText: '\uD83D\uDC09 BOSS', labelDir: 'rtl', labelSize: 36,
+                   wiring: 'Left leaf — opens on boss-door interact.\nOrb propels outward as doors swing open.' }),
+        makePane({ id: _nextId++, name: 'Right Door', face: 'front', role: 'lid', hinge: 'right', angle: 115, hoverAngle: 22,
+                   pw: 300, ph: 570, ox: 300, oy: 0, texture: 'boss-red', color: '#7a1414',
+                   biomeTag: 'dungeon',
+                   labelText: '\uD83D\uDC09 LAIR', labelDir: 'ltr', labelSize: 36,
+                   wiring: 'Right leaf — mirrors left. Wider angle reveals orb fully.' })
+      ];
+      orbConfig = {
+        p1: makeOrbPhase({ size: 40,  speed: 12, rings: 1, slices: 1, palette: 'ember', state: 'lit', x: 0, y: -20, z: 0 }),
+        p2: makeOrbPhase({ size: 90,  speed: 6,  rings: 5, slices: 4, palette: 'fire',  state: 'lit', x: 0, y: -20, z: 20 }),
+        p3: makeOrbPhase({ size: 180, speed: 6,  rings: 9, slices: 7, palette: 'fire',  state: 'lit', x: 0, y: -20, z: 60 })
+      };
+      phaseAnims = {
+        p1: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+        p2: { squish: 0, bounce: 0, poke: 100, spin: 0, tilt: 0, glow: 100 },
+        p3: { squish: 0, bounce: 100, poke: 0, spin: 0, tilt: 0, glow: 100 }
+      };
+    },
+    'Torch + Orb': function() {
+      shell = { bw: 100, bh: 200, bd: 50, persp: 600, rx: -5, ry: 12 };
+      colors = { cDark: '#1a0800', cLight: '#4a2810', cFloor: '#0a0400', cCeil: '#2a1808', cGlow: '#ff8833' };
+      _nextId = 1;
+      panes = [
+        makePane({ id: _nextId++, name: 'Back',   face: 'back',   structural: true, texture: 'stone', color: '#2a1a0a' }),
+        makePane({ id: _nextId++, name: 'Left',   face: 'left',   structural: true, texture: 'stone', color: '#2a1a0a' }),
+        makePane({ id: _nextId++, name: 'Right',  face: 'right',  structural: true, texture: 'stone', color: '#2a1a0a' }),
+        makePane({ id: _nextId++, name: 'Top',    face: 'top',    structural: true, texture: 'hidden' }),
+        makePane({ id: _nextId++, name: 'Bottom', face: 'bottom', structural: true, texture: 'grid-lines', color: '#0a0400' }),
+        makePane({ id: _nextId++, name: 'Handle', face: 'front',  role: 'decor',
+                   pw: 20, ph: 160, ox: 0, oy: 40, borderRadius: 0, color: '#3a2010', texture: 'dark-wood',
+                   wiring: 'Torch handle — always visible. Texture: dark-wood.' }),
+        makePane({ id: _nextId++, name: 'Sconce', face: 'front',  role: 'decor',
+                   pw: 50, ph: 30, ox: 0, oy: -30, borderRadius: 0, color: '#2a1808', texture: 'iron-plate',
+                   wiring: 'Metal sconce bracket. Sits below flame orb.' })
+      ];
+      orbConfig = {
+        p1: makeOrbPhase({ size: 50,  speed: 20, rings: 7, slices: 5, palette: 'smoke', state: 'unlit', x: 0, y: -60, z: 60 }),
+        p2: makeOrbPhase({ size: 65,  speed: 10, rings: 7, slices: 5, palette: 'ember', state: 'ember', x: 0, y: -60, z: 60 }),
+        p3: makeOrbPhase({ size: 80,  speed: 10, rings: 7, slices: 5, palette: 'fire',  state: 'lit',   x: 0, y: -60, z: 60 })
+      };
+      phaseMode = 'orb';
     },
     'Orb': function() {
       // Pure orb — box shell is a transparent ghost, orb is the star.
@@ -1454,9 +1958,9 @@
       };
       // Pyramid template: set phase anims for the wrapper
       phaseAnims = {
-        p1: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: true },
-        p2: { squish: true,  bounce: false, poke: false, spin: true,  tilt: false, glow: true },
-        p3: { squish: false, bounce: true,  poke: false, spin: true,  tilt: true,  glow: true }
+        p1: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 100 },
+        p2: { squish: 100, bounce: 0, poke: 0, spin: 100, tilt: 0, glow: 100 },
+        p3: { squish: 0, bounce: 100, poke: 0, spin: 100, tilt: 100, glow: 100 }
       };
       orbConfig = null;
       phaseMode = 'box';
@@ -1498,9 +2002,9 @@
       };
       phaseMode = 'orb';
       phaseAnims = {
-        p1: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: false },
-        p2: { squish: false, bounce: false, poke: false, spin: false, tilt: false, glow: true },
-        p3: { squish: false, bounce: false, poke: true,  spin: false, tilt: false, glow: true }
+        p1: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+        p2: { squish: 0, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 100 },
+        p3: { squish: 0, bounce: 0, poke: 100, spin: 0, tilt: 0, glow: 100 }
       };
     }
   };
@@ -1512,6 +2016,7 @@
   var boxEl = document.getElementById('box');
   var sceneEl = document.getElementById('scene');
   var spinEl = document.getElementById('spin');
+  var bodyEl = document.getElementById('body-anim');
   var faceInfoEl = document.getElementById('face-info');
   var paneListEl = document.getElementById('pane-list');
   var panePropsEl = document.getElementById('pane-props');
@@ -1523,8 +2028,10 @@
   // Shell controls
   document.querySelectorAll('#sidebar .cr input[data-p]').forEach(function(el) {
     el.addEventListener('input', function() {
+      pushUndo();
       var key = el.dataset.p;
-      var val = +el.value;
+      var isColor = el.type === 'color';
+      var val = isColor ? el.value : +el.value;
       // Sync sibling (range↔number)
       var siblings = document.querySelectorAll('[data-p="' + key + '"]');
       siblings.forEach(function(s) { if (s !== el) s.value = val; });
@@ -1542,12 +2049,16 @@
       if (!selectedPaneId) return;
       var p = getPaneById(selectedPaneId);
       if (!p) return;
+      pushUndo();
       var key = el.dataset.pp;
       var val = el.type === 'range' || el.type === 'number' ? +el.value : el.value;
       // Sync sibling
       var siblings = document.querySelectorAll('[data-pp="' + key + '"]');
       siblings.forEach(function(s) { if (s !== el) s.value = val; });
       p[key] = val;
+      // Track structural pw/ph overrides
+      if (p.structural && key === 'pw') p._pwOverride = (val !== getStructDefaultW(p.face));
+      if (p.structural && key === 'ph') p._phOverride = (val !== getStructDefaultH(p.face));
       updatePropVisibility(p);
       render();
       updateDirtyLabels(p);
@@ -1589,6 +2100,9 @@
       var def = getPaneDefault(paneIdx, key);
       if (def === null) return;
       p[key] = def;
+      // Clear structural override when resetting to default
+      if (p.structural && key === 'pw') p._pwOverride = false;
+      if (p.structural && key === 'ph') p._phOverride = false;
       setPPVal(key, p.structural && key === 'pw' ? getStructW(p) : p.structural && key === 'ph' ? getStructH(p) : def);
       updateDirtyLabels(p);
       render();
@@ -1644,7 +2158,7 @@
     snapGridEl.classList.toggle('disabled', !_snapEnabled);
   });
 
-  // Compute the face dimensions for a given pane
+  // Compute the face dimensions for a given pane's parent face
   function getFaceDims(p) {
     var f = p.face;
     var fw, fh;
@@ -1654,21 +2168,147 @@
     return { w: fw, h: fh };
   }
 
-  // Compute snap offset so pane edge aligns to face edge at the given anchor
-  function snapOffset(anchor, p) {
-    var fd = getFaceDims(p);
+  // Get a pane's bounding rect in face-local coords (origin = face center)
+  function getPaneRect(p) {
     var pw = p.structural ? getStructW(p) : p.pw;
     var ph = p.structural ? getStructH(p) : p.ph;
-    var halfGapX = (fd.w - pw) / 2;
-    var halfGapY = (fd.h - ph) / 2;
-    var ox = 0, oy = 0;
-    // Horizontal
-    if (anchor.indexOf('l') >= 0) ox = -halfGapX;
-    else if (anchor.indexOf('r') >= 0) ox = halfGapX;
-    // Vertical
-    if (anchor.indexOf('t') >= 0) oy = -halfGapY;
-    else if (anchor.indexOf('b') >= 0) oy = halfGapY;
-    return { ox: Math.round(ox), oy: Math.round(oy) };
+    return {
+      left:   p.ox - pw / 2,
+      right:  p.ox + pw / 2,
+      top:    p.oy - ph / 2,
+      bottom: p.oy + ph / 2,
+      cx:     p.ox,
+      cy:     p.oy,
+      w:      pw,
+      h:      ph
+    };
+  }
+
+  // Find all other panes on the same face (excluding the selected pane)
+  function getNeighbors(p) {
+    return panes.filter(function(other) {
+      return other.id !== p.id && other.face === p.face;
+    });
+  }
+
+  var SNAP_THRESHOLD = 50; // max distance (px) to search for a neighbor edge
+
+  // Neighbor-aware snap: find the nearest edge to close the gap toward
+  // the anchor direction. Falls back to face-edge alignment if no neighbor is close.
+  function snapOffset(anchor, p) {
+    var fd = getFaceDims(p);
+    var me = getPaneRect(p);
+    var neighbors = getNeighbors(p);
+
+    // Face edges in face-local coords (origin = center)
+    var faceLeft   = -fd.w / 2;
+    var faceRight  =  fd.w / 2;
+    var faceTop    = -fd.h / 2;
+    var faceBottom =  fd.h / 2;
+
+    // Determine which axis/direction each anchor component wants
+    var wantLeft  = anchor.indexOf('l') >= 0;
+    var wantRight = anchor.indexOf('r') >= 0;
+    var wantUp    = anchor.indexOf('t') >= 0;
+    var wantDown  = anchor.indexOf('b') >= 0;
+    var wantCenterH = !wantLeft && !wantRight;   // 'tc', 'bc', 'c'
+    var wantCenterV = !wantUp && !wantDown;      // 'ml', 'mr', 'c'
+
+    var bestOx = p.ox;
+    var bestOy = p.oy;
+
+    // ── Horizontal snap ──
+    if (wantLeft) {
+      // Snap my left edge toward: nearest neighbor's right edge, or face left edge
+      var bestTarget = faceLeft;  // default: face boundary
+      var bestDist = Math.abs(me.left - faceLeft);
+      neighbors.forEach(function(n) {
+        var nr = getPaneRect(n);
+        // Neighbor's right edge, if it's to my left (or overlapping)
+        var d = Math.abs(me.left - nr.right);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = nr.right;
+        }
+        // Also consider aligning my left to neighbor's left (flush alignment)
+        d = Math.abs(me.left - nr.left);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = nr.left;
+        }
+      });
+      bestOx = bestTarget + me.w / 2;
+    } else if (wantRight) {
+      // Snap my right edge toward: nearest neighbor's left edge, or face right edge
+      var bestTarget = faceRight;
+      var bestDist = Math.abs(me.right - faceRight);
+      neighbors.forEach(function(n) {
+        var nr = getPaneRect(n);
+        var d = Math.abs(me.right - nr.left);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = nr.left;
+        }
+        d = Math.abs(me.right - nr.right);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = nr.right;
+        }
+      });
+      bestOx = bestTarget - me.w / 2;
+    } else if (wantCenterH) {
+      // Center horizontally: snap to face center (ox=0), or to a neighbor's center
+      var bestTarget = 0;
+      var bestDist = Math.abs(p.ox);
+      neighbors.forEach(function(n) {
+        var d = Math.abs(p.ox - n.ox);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = n.ox;
+        }
+      });
+      bestOx = bestTarget;
+    }
+
+    // ── Vertical snap ──
+    if (wantUp) {
+      var bestTarget = faceTop;
+      var bestDist = Math.abs(me.top - faceTop);
+      neighbors.forEach(function(n) {
+        var nr = getPaneRect(n);
+        var d = Math.abs(me.top - nr.bottom);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = nr.bottom;
+        }
+        d = Math.abs(me.top - nr.top);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = nr.top;
+        }
+      });
+      bestOy = bestTarget + me.h / 2;
+    } else if (wantDown) {
+      var bestTarget = faceBottom;
+      var bestDist = Math.abs(me.bottom - faceBottom);
+      neighbors.forEach(function(n) {
+        var nr = getPaneRect(n);
+        var d = Math.abs(me.bottom - nr.top);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = nr.top;
+        }
+        d = Math.abs(me.bottom - nr.bottom);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = nr.bottom;
+        }
+      });
+      bestOy = bestTarget - me.h / 2;
+    } else if (wantCenterV) {
+      var bestTarget = 0;
+      var bestDist = Math.abs(p.oy);
+      neighbors.forEach(function(n) {
+        var d = Math.abs(p.oy - n.oy);
+        if (d < bestDist && d <= SNAP_THRESHOLD) {
+          bestDist = d; bestTarget = n.oy;
+        }
+      });
+      bestOy = bestTarget;
+    }
+
+    return { ox: Math.round(bestOx), oy: Math.round(bestOy) };
   }
 
   snapGridEl.addEventListener('click', function(e) {
@@ -1678,20 +2318,50 @@
     if (!p) return;
     var anchor = btn.dataset.snap;
     var s = snapOffset(anchor, p);
-    p.ox = s.ox;
-    p.oy = s.oy;
+
+    if (Sel.isMulti()) {
+      // Group snap: compute delta from primary pane, apply to all selected
+      var dx = s.ox - p.ox;
+      var dy = s.oy - p.oy;
+      Sel.all().forEach(function(id) {
+        var sp = getPaneById(id);
+        if (sp) { sp.ox += dx; sp.oy += dy; }
+      });
+    } else {
+      p.ox = s.ox;
+      p.oy = s.oy;
+    }
+
     setPPVal('ox', p.ox);
     setPPVal('oy', p.oy);
     updateDirtyLabels(p);
     render();
   });
 
-  // Arrow-key nudge for selected pane
+  // Arrow-key nudge for selected pane(s) — multi-select aware
   document.addEventListener('keydown', function(e) {
     if (!selectedPaneId) return;
     // Don't hijack when typing in an input
     var tag = e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+    // Delete key — remove all selected non-structural panes
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      pushUndo();
+      var toRemove = Sel.all().filter(function(id) {
+        var p = getPaneById(id);
+        return p && !p.structural;
+      });
+      if (!toRemove.length) return;
+      e.preventDefault();
+      panes = panes.filter(function(p) { return toRemove.indexOf(p.id) < 0; });
+      Sel.clear(); _syncSelCompat();
+      panePropsEl.classList.remove('visible');
+      renderPaneList();
+      render();
+      return;
+    }
+
     var dx = 0, dy = 0;
     var step = e.shiftKey ? 10 : 1;
     switch (e.key) {
@@ -1702,13 +2372,22 @@
       default: return;
     }
     e.preventDefault();
-    var p = getPaneById(selectedPaneId);
-    if (!p) return;
-    p.ox += dx;
-    p.oy += dy;
-    setPPVal('ox', p.ox);
-    setPPVal('oy', p.oy);
-    updateDirtyLabels(p);
+    pushUndo();
+
+    // Nudge ALL selected panes
+    var ids = Sel.all();
+    ids.forEach(function(id) {
+      var p = getPaneById(id);
+      if (p) { p.ox += dx; p.oy += dy; }
+    });
+
+    // Update the prop panel for the primary pane
+    var primary = getPaneById(selectedPaneId);
+    if (primary) {
+      setPPVal('ox', primary.ox);
+      setPPVal('oy', primary.oy);
+      updateDirtyLabels(primary);
+    }
     render();
   });
 
@@ -1750,16 +2429,46 @@
   function syncPhaseAnimToggles() {
     var pa = activePhaseAnims();
     document.querySelectorAll('.pa-toggle').forEach(function(btn) {
-      btn.classList.toggle('active', !!pa[btn.dataset.anim]);
+      btn.classList.toggle('active', pa[btn.dataset.anim] > 0);
+    });
+    // Sync sliders + value labels for intensity anims
+    document.querySelectorAll('.pa-slider').forEach(function(slider) {
+      var key = slider.dataset.anim;
+      slider.value = pa[key] || 0;
+    });
+    document.querySelectorAll('.pa-val').forEach(function(span) {
+      var key = span.dataset.anim;
+      span.textContent = pa[key] || 0;
     });
   }
 
+  // Button clicks toggle between 0 and 100
   document.querySelectorAll('.pa-toggle').forEach(function(btn) {
     btn.addEventListener('click', function() {
+      pushUndo();
       var pa = activePhaseAnims();
       var key = btn.dataset.anim;
-      pa[key] = !pa[key];
-      btn.classList.toggle('active', pa[key]);
+      pa[key] = pa[key] > 0 ? 0 : 100;
+      syncPhaseAnimToggles();
+      render();
+    });
+  });
+
+  // Sliders set exact intensity for squish/bounce/poke
+  document.querySelectorAll('.pa-slider').forEach(function(slider) {
+    slider.addEventListener('input', function() {
+      pushUndo();
+      var pa = activePhaseAnims();
+      var key = slider.dataset.anim;
+      pa[key] = +slider.value;
+      // Sync button active state and value label
+      var row = slider.closest('.pa-row');
+      if (row) {
+        var btn = row.querySelector('.pa-toggle');
+        if (btn) btn.classList.toggle('active', pa[key] > 0);
+        var valSpan = row.querySelector('.pa-val');
+        if (valSpan) valSpan.textContent = pa[key];
+      }
       render();
     });
   });
@@ -1787,6 +2496,7 @@
   var _tplDefaults = {};  // { paneIndex: { key: value, ... }, _shell: {...}, _colors: {...} }
   var _activeTplName = null;
 
+  var _tplGlowDefaults = [];  // snapshot of glows at template load
   var _tplOrbDefaults = null; // snapshot of orbConfig at template load
   var _tplPyrDefaults = null; // snapshot of pyramidConfig at template load
   var _tplPhaseAnimDefaults = null; // snapshot of phaseAnims at template load
@@ -1798,10 +2508,11 @@
     };
     panes.forEach(function(p, i) {
       _tplDefaults[i] = {};
-      ['pw','ph','ox','oy','angle','hoverAngle','alpha','borderRadius','spinX','spinY','labelSize'].forEach(function(k) {
+      ['pw','ph','ox','oy','oz','angle','hoverAngle','alpha','borderRadius','rotX','rotY','rotZ','spinX','spinY','labelSize'].forEach(function(k) {
         _tplDefaults[i][k] = p[k];
       });
     });
+    _tplGlowDefaults = JSON.parse(JSON.stringify(glows));
     _tplOrbDefaults = orbConfig ? JSON.parse(JSON.stringify(orbConfig)) : null;
     _tplPyrDefaults = pyramidConfig ? JSON.parse(JSON.stringify(pyramidConfig)) : null;
     _tplPhaseAnimDefaults = JSON.parse(JSON.stringify(phaseAnims));
@@ -1824,6 +2535,23 @@
   var _BUILTIN_NAMES = Object.keys(TEMPLATES);
   var LS_KEY = 'boxforge_user_templates';
 
+  // ── Centering migration ──
+  // Old templates positioned panes at (0,0) of the body div. Panes whose
+  // dimensions differ from the body (e.g. left/right faces in a non-cubic box)
+  // had to carry manual ox/oy compensation so that CSS 3D rotations would
+  // "look close enough."  The new renderer centers every pane in the body
+  // (via left/top), so ox/oy now means "offset from face center."
+  // This helper subtracts the old implicit centering compensation from ox/oy.
+  function _migrateCentering() {
+    var W = shell.bw, H = shell.bh;
+    panes.forEach(function(p) {
+      var pw = p.structural ? getStructW(p) : p.pw;
+      var ph = p.structural ? getStructH(p) : p.ph;
+      p.ox = Math.round(((p.ox || 0) - (W - pw) / 2) * 10) / 10;
+      p.oy = Math.round(((p.oy || 0) - (H - ph) / 2) * 10) / 10;
+    });
+  }
+
   // Generate built-in snapshots by running each imperative template, serializing, then restoring defaults
   (function snapshotBuiltins() {
     var origShell = JSON.parse(JSON.stringify(shell));
@@ -1840,6 +2568,7 @@
       _nextGlowId = glows.length + 1;
       _nextId = 1;
       TEMPLATES[name]();
+      _migrateCentering();
       _builtinSnapshots[name] = serializeProject();
     });
     // Restore to first template after snapshotting
@@ -1967,9 +2696,13 @@
 
   function renderPaneList() {
     paneListEl.innerHTML = '';
+    var selCount = Sel.count();
     panes.forEach(function(p) {
+      var isPrimary = p.id === selectedPaneId;
+      var isInSel = Sel.has(p.id) && Sel.isMulti();
       var div = document.createElement('div');
-      div.className = 'pane-item' + (p.structural ? ' structural' : '') + (p.id === selectedPaneId ? ' selected' : '');
+      div.className = 'pane-item' + (p.structural ? ' structural' : '') +
+        (isPrimary ? ' selected' : '') + (isInSel ? ' multi-selected' : '');
       div.innerHTML =
         '<div class="pi-color" style="background:' + p.color + '"></div>' +
         '<span class="pi-name">' + esc(p.name) + '</span>' +
@@ -1978,19 +2711,37 @@
       div.addEventListener('click', function(e) {
         if (e.target.classList.contains('pi-del')) {
           panes = panes.filter(function(x) { return x.id !== p.id; });
-          if (selectedPaneId === p.id) { selectedPaneId = null; panePropsEl.classList.remove('visible'); }
+          if (Sel.has(p.id)) { Sel.toggle(p.id); _syncSelCompat(); }
+          if (!selectedPaneId) panePropsEl.classList.remove('visible');
           renderPaneList();
           render();
           return;
         }
-        selectPane(p.id);
+        if (e.shiftKey) {
+          Sel.toggle(p.id);
+          _syncSelCompat();
+          if (Sel._primary) selectPane(Sel._primary);
+          else { panePropsEl.classList.remove('visible'); renderPaneList(); render(); }
+        } else {
+          selectPane(p.id);
+        }
       });
       paneListEl.appendChild(div);
     });
+    // Selection count badge
+    if (selCount > 1) {
+      var badge = document.createElement('div');
+      badge.className = 'sel-badge';
+      badge.textContent = selCount + ' panes selected (Shift+click to toggle)';
+      paneListEl.insertBefore(badge, paneListEl.firstChild);
+    }
   }
 
   function selectPane(id) {
-    selectedPaneId = id;
+    // If not already in multi-select, replace the whole set
+    if (!Sel.has(id)) Sel.set(id);
+    else Sel._primary = id;   // keep multi-set, change anchor
+    _syncSelCompat();
     selectedGlowId = null;
     document.getElementById('glow-props').style.display = 'none';
     var p = getPaneById(id);
@@ -2003,10 +2754,14 @@
     setPPVal('ph', p.structural ? getStructH(p) : p.ph);
     setPPVal('ox', p.ox);
     setPPVal('oy', p.oy);
+    setPPVal('oz', p.oz);
     setPPVal('angle', p.angle);
     setPPVal('hoverAngle', p.hoverAngle);
     setPPVal('alpha', p.alpha);
     setPPVal('borderRadius', p.borderRadius);
+    setPPVal('rotX', p.rotX || 0);
+    setPPVal('rotY', p.rotY || 0);
+    setPPVal('rotZ', p.rotZ || 0);
     setPPVal('spinX', p.spinX || 0);
     setPPVal('spinY', p.spinY || 0);
     setPPVal('labelSize', p.labelSize);
@@ -2031,11 +2786,9 @@
     document.getElementById('pp-angle-row').style.display = isLid ? '' : 'none';
     document.getElementById('pp-hover-row').style.display = isLid ? '' : 'none';
 
-    // Disable pw/ph for structural panes (dimensions come from shell)
-    var pwDisable = p.structural;
-    var phDisable = p.structural;
-    document.querySelectorAll('[data-pp="pw"]').forEach(function(el) { el.disabled = pwDisable; });
-    document.querySelectorAll('[data-pp="ph"]').forEach(function(el) { el.disabled = phDisable; });
+    // Structural panes: show shell-derived size as placeholder, but allow override
+    document.querySelectorAll('[data-pp="pw"]').forEach(function(el) { el.disabled = false; });
+    document.querySelectorAll('[data-pp="ph"]').forEach(function(el) { el.disabled = false; });
 
     // Mark slider labels dirty/resettable based on template defaults
     updateDirtyLabels(p);
@@ -2043,7 +2796,7 @@
 
   function updateDirtyLabels(p) {
     var paneIdx = panes.indexOf(p);
-    var sliderKeys = ['pw','ph','ox','oy','angle','hoverAngle','alpha','borderRadius','spinX','spinY','labelSize'];
+    var sliderKeys = ['pw','ph','ox','oy','oz','angle','hoverAngle','alpha','borderRadius','rotX','rotY','rotZ','spinX','spinY','labelSize'];
     sliderKeys.forEach(function(key) {
       var els = document.querySelectorAll('#pane-props [data-pp="' + key + '"]');
       var labelEl = null;
@@ -2073,18 +2826,107 @@
   }
 
   // ════════════════════════════════════════════════════
-  //  STRUCTURAL PANE SIZING
+  //  RENDERER (R) — 3D scene, transforms, textures
+  //  All rendering functions live in this block.
+  //  The R facade exposes shared functions for use by
+  //  the Exporter and Snap systems.
   // ════════════════════════════════════════════════════
 
-  function getStructW(p) {
-    var f = p.face;
-    if (f === 'back' || f === 'front' || f === 'top' || f === 'bottom') return shell.bw;
+  // ── Structural pane sizing ──
+
+  function getStructDefaultW(face) {
+    if (face === 'back' || face === 'front' || face === 'top' || face === 'bottom') return shell.bw;
     return shell.bd * 2; // left, right
   }
-  function getStructH(p) {
-    var f = p.face;
-    if (f === 'back' || f === 'front' || f === 'left' || f === 'right') return shell.bh;
+  function getStructDefaultH(face) {
+    if (face === 'back' || face === 'front' || face === 'left' || face === 'right') return shell.bh;
     return shell.bd * 2; // top, bottom
+  }
+  function getStructW(p) {
+    // If pane has a user override that differs from the shell-derived default, respect it
+    if (p._pwOverride) return p.pw;
+    return getStructDefaultW(p.face);
+  }
+  function getStructH(p) {
+    if (p._phOverride) return p.ph;
+    return getStructDefaultH(p.face);
+  }
+
+  // ════════════════════════════════════════════════════
+  //  DYNAMIC KEYFRAME GENERATION (intensity-scaled)
+  // ════════════════════════════════════════════════════
+
+  // Inject a <style> element for dynamic keyframes
+  var _dynStyleEl = document.createElement('style');
+  _dynStyleEl.id = 'dynamic-kf';
+  document.head.appendChild(_dynStyleEl);
+
+  // Interpolate: lerp a value toward identity (1 for scale, 0 for translate)
+  function _s(target, intensity) { return 1 + (target - 1) * intensity / 100; }
+  function _t(target, intensity) { return target * intensity / 100; }
+
+  function generateIntensityKeyframes(intensity) {
+    var i = intensity;
+    // Round values to 4 decimal places for clean CSS
+    function s(v) { return _s(v, i).toFixed(4); }
+    function t(v) { return _t(v, i).toFixed(2); }
+
+    return {
+      squish: '@keyframes wb-box-squish-i {\n' +
+        '  0%   { transform: scaleY(1) scaleX(1); }\n' +
+        '  50%  { transform: scaleY(' + s(0.78) + ') scaleX(' + s(1.14) + '); }\n' +
+        '  100% { transform: scaleY(1) scaleX(1); }\n' +
+        '}\n',
+      bounce: '@keyframes wb-box-bounce-i {\n' +
+        '  0%   { transform: translateY(0); }\n' +
+        '  25%  { transform: translateY(' + t(-20) + 'px); }\n' +
+        '  45%  { transform: translateY(0) scaleY(' + s(0.82) + ') scaleX(' + s(1.12) + '); }\n' +
+        '  60%  { transform: translateY(' + t(-8) + 'px) scaleY(' + s(1.06) + '); }\n' +
+        '  75%  { transform: translateY(0) scaleY(' + s(0.96) + ') scaleX(' + s(1.03) + '); }\n' +
+        '  100% { transform: translateY(0) scaleY(1) scaleX(1); }\n' +
+        '}\n',
+      poke: '@keyframes wb-box-poke-i {\n' +
+        '  0%   { transform: translateY(0) scaleY(1); }\n' +
+        '  18%  { transform: translateY(' + t(10) + 'px) scaleY(' + s(0.78) + ') scaleX(' + s(1.12) + '); }\n' +
+        '  40%  { transform: translateY(' + t(-6) + 'px) scaleY(' + s(1.1) + ') scaleX(' + s(0.95) + '); }\n' +
+        '  60%  { transform: translateY(' + t(3) + 'px) scaleY(' + s(0.96) + ') scaleX(' + s(1.03) + '); }\n' +
+        '  80%  { transform: translateY(' + t(-1) + 'px) scaleY(' + s(1.02) + '); }\n' +
+        '  100% { transform: translateY(0) scaleY(1) scaleX(1); }\n' +
+        '}\n'
+    };
+  }
+
+  var _lastKfHash = '';
+  // Returns the unique keyframe names used this frame (includes intensity in name)
+  function updateDynamicKeyframes(pa) {
+    var sq = pa.squish || 0, bn = pa.bounce || 0, pk = pa.poke || 0;
+    var sp = pa.spin || 0, tl = pa.tilt || 0;
+    var hash = sq + ',' + bn + ',' + pk + ',' + sp + ',' + tl;
+    var names = {
+      squish: 'wb-box-squish-' + sq,
+      bounce: 'wb-box-bounce-' + bn,
+      poke:   'wb-box-poke-' + pk,
+      spin:   'wb-box-spin-' + sp,
+      tilt:   'wb-box-tilt-' + tl
+    };
+    if (hash !== _lastKfHash) {
+      _lastKfHash = hash;
+      var css = '';
+      if (sq > 0) css += generateIntensityKeyframes(sq).squish.replace('wb-box-squish-i', names.squish);
+      if (bn > 0) css += generateIntensityKeyframes(bn).bounce.replace('wb-box-bounce-i', names.bounce);
+      if (pk > 0) css += generateIntensityKeyframes(pk).poke.replace('wb-box-poke-i', names.poke);
+      // Tilt: intensity scales the tilt angle (base -15deg)
+      if (tl > 0) {
+        var tiltAngle = (-15 * tl / 100).toFixed(2);
+        css += '@keyframes ' + names.tilt + ' {\n';
+        css += '  0%   { transform: rotateX(' + tiltAngle + 'deg) rotateY(0deg); }\n';
+        css += '  100% { transform: rotateX(' + tiltAngle + 'deg) rotateY(360deg); }\n';
+        css += '}\n';
+      }
+      // Spin uses the static keyframe but intensity controls duration (in render)
+      _dynStyleEl.textContent = css;
+    }
+    return names;
   }
 
   // ════════════════════════════════════════════════════
@@ -2119,26 +2961,39 @@
     sceneEl.style.height = H + 'px';
     spinEl.style.width = W + 'px';
     spinEl.style.height = H + 'px';
+    bodyEl.style.width = W + 'px';
+    bodyEl.style.height = H + 'px';
 
-    // Composite all spinEl animations from phase anims
-    var allSpinAnims = [];
+    // Composite phase animations on SEPARATE elements to avoid transform conflicts
+    // spinEl = rotation layer (spin/tilt), bodyEl = deformation layer (squish/bounce/poke)
     var pa = activePhaseAnims();
-    // Spin/Tilt — per-phase display anims (also export)
-    if (pa.tilt) allSpinAnims.push('box3d-tilt-orbit 4s infinite linear');
-    else if (pa.spin) allSpinAnims.push('box3d-rotate 3.5s infinite linear');
-    // Body anims
-    if (pa.squish) allSpinAnims.push('wb-box-squish 1.2s ease-in-out infinite');
-    if (pa.bounce) allSpinAnims.push('wb-box-bounce 0.8s ease-in-out infinite');
-    if (pa.poke) allSpinAnims.push('wb-box-poke 0.6s cubic-bezier(0.34,1.56,0.64,1) infinite');
-    spinEl.style.animation = allSpinAnims.length ? allSpinAnims.join(', ') : '';
+    var kfNames = updateDynamicKeyframes(pa);
+
+    // Spin/Tilt → spinEl (rotates the whole box)
+    var rotAnims = [];
+    if (pa.tilt > 0) {
+      var tiltDur = (4 * 100 / pa.tilt).toFixed(1);
+      rotAnims.push(kfNames.tilt + ' ' + tiltDur + 's infinite linear');
+    } else if (pa.spin > 0) {
+      var spinDur = (3.5 * 100 / pa.spin).toFixed(1);
+      rotAnims.push('box3d-rotate ' + spinDur + 's infinite linear');
+    }
+    spinEl.style.animation = rotAnims.length ? rotAnims.join(', ') : '';
+
+    // Body anims (squish/bounce/poke) → bodyEl (deforms the box content)
+    var bodyAnims = [];
+    if (pa.squish > 0) bodyAnims.push(kfNames.squish + ' 1.2s ease-in-out infinite');
+    if (pa.bounce > 0) bodyAnims.push(kfNames.bounce + ' 0.8s ease-in-out infinite');
+    if (pa.poke > 0)   bodyAnims.push(kfNames.poke + ' 0.6s cubic-bezier(0.34,1.56,0.64,1) infinite');
+    bodyEl.style.animation = bodyAnims.length ? bodyAnims.join(', ') : '';
     // Glow — per-phase toggle
-    boxEl.classList.toggle('no-glow', !pa.glow);
+    boxEl.classList.toggle('no-glow', !(pa.glow > 0));
 
     // Remove old rendered elements (panes, lids, orb, editable glows)
-    spinEl.querySelectorAll('.pane3d, .lid-wrapper, .wb-orb, .wb-pyramid, .glow3d').forEach(function(el) { el.remove(); });
+    bodyEl.querySelectorAll('.pane3d, .lid-wrapper, .wb-orb, .wb-pyramid, .glow3d').forEach(function(el) { el.remove(); });
 
     // Hide hardcoded glow planes if we have custom glows
-    var hardcodedGlow = spinEl.querySelector('.box3d-glow');
+    var hardcodedGlow = bodyEl.querySelector('.box3d-glow');
     if (hardcodedGlow) hardcodedGlow.style.display = glows.length > 0 ? 'none' : '';
 
     // Render editable glows
@@ -2169,7 +3024,30 @@
       }
       glowEl.style.pointerEvents = 'auto';
       glowEl.addEventListener('click', function(e) { e.stopPropagation(); selectGlow(g.id); });
-      spinEl.appendChild(glowEl);
+      bodyEl.appendChild(glowEl);
+      // Render glow child as sibling (not inside blurred glow — filter:blur inherits)
+      if (g.child && g.child.text) {
+        var phKey = currentState === 'opened' ? 'p3' : currentState === 'hover' ? 'p2' : 'p1';
+        var cp = g.child[phKey];
+        if (cp.alpha > 0 && cp.size > 0) {
+          var childSpan = document.createElement('span');
+          childSpan.className = 'glow3d glow-child';
+          childSpan.textContent = g.child.text;
+          // Position at glow center using same coordinates
+          var cx = (W - gw) / 2 + g.ox + gw / 2;
+          var cy = (H - gh) / 2 + g.oy + gh / 2;
+          childSpan.style.cssText = 'position:absolute;' +
+            'left:' + cx + 'px;top:' + cy + 'px;' +
+            'transform:translate(-50%,-50%) translateY(' + cp.oy + 'px) translateZ(' + (g.oz + cp.oz) + 'px) rotateX(' + (g.rotX + (cp.rotX || 0)) + 'deg) rotateY(' + (g.rotY + (cp.rotY || 0)) + 'deg);' +
+            'font-size:' + cp.size + 'px;' +
+            'opacity:' + (cp.alpha / 100) + ';' +
+            'pointer-events:none;' +
+            'transition:all 0.4s cubic-bezier(0.33,1,0.68,1);' +
+            'text-shadow:0 0 12px rgba(255,200,80,0.5);' +
+            'line-height:1;white-space:nowrap;';
+          bodyEl.appendChild(childSpan);
+        }
+      }
     });
 
     var isOpen = currentState === 'opened';
@@ -2179,31 +3057,47 @@
       var pw = p.structural ? getStructW(p) : p.pw;
       var ph = p.structural ? getStructH(p) : p.ph;
 
-      // Compute base transform for the face position
-      var transform = getFaceTransform(p.face, W, H, D, p.ox, p.oy);
+      // ── Centering: place each pane so its center aligns with the body center.
+      // This ensures all CSS 3D rotations (rotateY/rotateX in face transforms)
+      // pivot around the shared box center regardless of pane dimensions.
+      var centerL = ((W - pw) / 2) + 'px';
+      var centerT = ((H - ph) / 2) + 'px';
+
+      // Compute base transform for the face position + static rotation
+      var transform = getFaceTransform(p.face, W, H, D, p.ox, p.oy, p.oz) + getPaneRotSuffix(p);
       var bg = getTextureBg(p);
 
       if (p.role === 'lid') {
-        // Lids get a wrapper for the hinge transform
+        // Lids use a 2-layer structure:
+        //   wrapper  — face positioning (centered in body, default transform-origin = body center)
+        //   paneEl   — hinge animation  (transform-origin = hinge edge)
+        // This separation is needed because the face transform must rotate around
+        // the body center (for correct 3D geometry when shell resizes), while the
+        // hinge must rotate around the lid edge (for the opening animation).
         var wrapper = document.createElement('div');
         wrapper.className = 'lid-wrapper';
         wrapper.style.width = pw + 'px';
         wrapper.style.height = ph + 'px';
+        wrapper.style.left = centerL;
+        wrapper.style.top = centerT;
 
-        // Position wrapper at the face, then apply hinge
-        var lidBase = getLidBaseTransform(p.face, W, H, D, p.ox, p.oy, pw, ph);
+        // Wrapper: face positioning only (default origin = center = body center)
+        var lidBase = getLidBaseTransform(p.face, W, H, D, p.ox, p.oy, pw, ph, p.oz) + getPaneRotSuffix(p);
+        wrapper.style.transform = lidBase;
+
+        // Pane: hinge animation (origin = hinge edge)
         var hingeOrigin = getHingeOrigin(p.hinge, pw, ph);
         var hingeTransform = getHingeOpen(p.hinge, p.angle, isOpen, isHover, p.hoverAngle);
 
-        wrapper.style.transform = lidBase + ' ' + hingeTransform;
-        wrapper.style.transformOrigin = hingeOrigin;
-
         var paneEl = document.createElement('div');
-        paneEl.className = 'pane3d' + (p.id === selectedPaneId ? ' selected' : '');
+        paneEl.className = 'pane3d' + (p.id === selectedPaneId ? ' selected' : '') + (Sel.has(p.id) && Sel.isMulti() ? ' multi-selected' : '');
         paneEl.style.width = pw + 'px';
         paneEl.style.height = ph + 'px';
         paneEl.style.background = bg;
         paneEl.style.opacity = p.alpha / 100;
+        paneEl.style.transform = hingeTransform;
+        paneEl.style.transformOrigin = hingeOrigin;
+        paneEl.style.transition = 'transform 0.4s cubic-bezier(0.33, 1, 0.68, 1)';
         if (p.borderRadius) paneEl.style.borderRadius = p.borderRadius + '%';
         paneEl.dataset.paneId = p.id;
 
@@ -2212,13 +3106,15 @@
         applyPaneSpin(paneEl, p);
 
         wrapper.appendChild(paneEl);
-        spinEl.appendChild(wrapper);
+        bodyEl.appendChild(wrapper);
       } else {
         // Structural or decor: direct placement
         var paneEl = document.createElement('div');
-        paneEl.className = 'pane3d' + (p.id === selectedPaneId ? ' selected' : '');
+        paneEl.className = 'pane3d' + (p.id === selectedPaneId ? ' selected' : '') + (Sel.has(p.id) && Sel.isMulti() ? ' multi-selected' : '');
         paneEl.style.width = pw + 'px';
         paneEl.style.height = ph + 'px';
+        paneEl.style.left = centerL;
+        paneEl.style.top = centerT;
         paneEl.style.transform = transform;
         paneEl.style.background = bg;
         paneEl.style.opacity = p.alpha / 100;
@@ -2230,7 +3126,7 @@
         addPaneListeners(paneEl, p);
         applyPaneSpin(paneEl, p);
 
-        spinEl.appendChild(paneEl);
+        bodyEl.appendChild(paneEl);
       }
     });
 
@@ -2339,7 +3235,7 @@
       orbEl.appendChild(ringEl);
     }
 
-    spinEl.appendChild(orbEl);
+    bodyEl.appendChild(orbEl);
   }
 
   function renderPyramid(W, H, D) {
@@ -2422,32 +3318,42 @@
     facesParent.appendChild(shadow);
 
     pyrEl.appendChild(wrapper);
-    spinEl.appendChild(pyrEl);
+    bodyEl.appendChild(pyrEl);
   }
 
-  function getFaceTransform(face, W, H, D, ox, oy) {
-    ox = ox || 0; oy = oy || 0;
+  function getFaceTransform(face, W, H, D, ox, oy, oz) {
+    ox = ox || 0; oy = oy || 0; oz = oz || 0;
     switch (face) {
-      case 'back':   return 'translateZ(' + (-D) + 'px) translate(' + ox + 'px,' + oy + 'px)';
-      case 'front':  return 'translateZ(' + D + 'px) translate(' + ox + 'px,' + oy + 'px)';
-      case 'left':   return 'translate(' + (ox - W/2) + 'px,' + oy + 'px) rotateY(90deg)';
-      case 'right':  return 'translate(' + (ox + W/2) + 'px,' + oy + 'px) rotateY(90deg)';
-      case 'top':    return 'translate(' + ox + 'px,' + oy + 'px) rotateX(90deg) translateZ(' + (H/2) + 'px)';
-      case 'bottom': return 'translate(' + ox + 'px,' + oy + 'px) rotateX(90deg) translateZ(' + (-H/2) + 'px)';
+      case 'back':   return 'translateZ(' + (-D + oz) + 'px) translate(' + ox + 'px,' + oy + 'px)';
+      case 'front':  return 'translateZ(' + (D + oz) + 'px) translate(' + ox + 'px,' + oy + 'px)';
+      case 'left':   return 'translate(' + (ox - W/2) + 'px,' + oy + 'px) rotateY(90deg) translateZ(' + oz + 'px)';
+      case 'right':  return 'translate(' + (ox + W/2) + 'px,' + oy + 'px) rotateY(90deg) translateZ(' + oz + 'px)';
+      case 'top':    return 'translate(' + ox + 'px,' + oy + 'px) rotateX(90deg) translateZ(' + (H/2) + 'px) translateY(' + oz + 'px)';
+      case 'bottom': return 'translate(' + ox + 'px,' + oy + 'px) rotateX(90deg) translateZ(' + (-H/2) + 'px) translateY(' + oz + 'px)';
     }
     return '';
   }
 
-  function getLidBaseTransform(face, W, H, D, ox, oy, pw, ph) {
-    ox = ox || 0; oy = oy || 0;
+  // Returns the static rotation suffix for a pane (empty string if all zero)
+  function getPaneRotSuffix(p) {
+    if (!p.rotX && !p.rotY && !p.rotZ) return '';
+    var s = '';
+    if (p.rotX) s += ' rotateX(' + p.rotX + 'deg)';
+    if (p.rotY) s += ' rotateY(' + p.rotY + 'deg)';
+    if (p.rotZ) s += ' rotateZ(' + p.rotZ + 'deg)';
+    return s;
+  }
+
+  function getLidBaseTransform(face, W, H, D, ox, oy, pw, ph, oz) {
+    ox = ox || 0; oy = oy || 0; oz = oz || 0;
     // Lid panes sit on the front face by default, offset from center
     switch (face) {
-      case 'front':  return 'translateZ(' + D + 'px) translate(' + ox + 'px,' + oy + 'px)';
-      case 'back':   return 'translateZ(' + (-D) + 'px) translate(' + ox + 'px,' + oy + 'px)';
-      case 'left':   return 'translate(' + (ox - W/2) + 'px,' + oy + 'px) rotateY(90deg)';
-      case 'right':  return 'translate(' + (ox + W/2) + 'px,' + oy + 'px) rotateY(90deg)';
-      case 'top':    return 'translate(' + ox + 'px,' + oy + 'px) rotateX(90deg) translateZ(' + (H/2) + 'px)';
-      case 'bottom': return 'translate(' + ox + 'px,' + oy + 'px) rotateX(90deg) translateZ(' + (-H/2) + 'px)';
+      case 'front':  return 'translateZ(' + (D + oz) + 'px) translate(' + ox + 'px,' + oy + 'px)';
+      case 'back':   return 'translateZ(' + (-D + oz) + 'px) translate(' + ox + 'px,' + oy + 'px)';
+      case 'left':   return 'translate(' + (ox - W/2) + 'px,' + oy + 'px) rotateY(90deg) translateZ(' + oz + 'px)';
+      case 'right':  return 'translate(' + (ox + W/2) + 'px,' + oy + 'px) rotateY(90deg) translateZ(' + oz + 'px)';
+      case 'top':    return 'translate(' + ox + 'px,' + oy + 'px) rotateX(90deg) translateZ(' + (H/2) + 'px) translateY(' + oz + 'px)';
+      case 'bottom': return 'translate(' + ox + 'px,' + oy + 'px) rotateX(90deg) translateZ(' + (-H/2) + 'px) translateY(' + oz + 'px)';
     }
     return '';
   }
@@ -2467,8 +3373,8 @@
     var a = 0;
     if (isOpen) a = angle;
     else if (isHover) a = ha;
-    // For slides, hover uses hoverAngle as a percentage (0-100)
-    var slidePct = isOpen ? 100 : isHover ? Math.min(ha, 30) : 0;
+    // For slides, angle controls open percentage, hoverAngle controls hover percentage (0-100)
+    var slidePct = isOpen ? Math.min(angle, 100) : isHover ? Math.min(ha, 30) : 0;
 
     switch (hinge) {
       case 'bottom':      return 'rotateX(' + (-a) + 'deg)';
@@ -2555,7 +3461,15 @@
   function addPaneListeners(el, p) {
     el.addEventListener('click', function(e) {
       e.stopPropagation();
-      selectPane(p.id);
+      if (e.shiftKey) {
+        // Shift+click: toggle in/out of multi-select
+        Sel.toggle(p.id);
+        _syncSelCompat();
+        if (Sel._primary) selectPane(Sel._primary);
+        else { panePropsEl.classList.remove('visible'); renderPaneList(); render(); }
+      } else {
+        selectPane(p.id);
+      }
     });
     el.addEventListener('mouseenter', function() {
       var pw = p.structural ? getStructW(p) : p.pw;
@@ -2563,13 +3477,32 @@
       faceInfoEl.textContent = p.name + ' (' + p.face + ')\n' +
         'Size: ' + pw + ' x ' + ph + '  |  Role: ' + p.role +
         (p.role === 'lid' ? '  |  Hinge: ' + p.hinge + '  |  Angle: ' + p.angle + '\u00b0' : '') +
-        '\nOffset: (' + p.ox + ', ' + p.oy + ')  |  Texture: ' + p.texture;
+        '\nOffset: (' + p.ox + ', ' + p.oy + ', ' + p.oz + ')  |  Texture: ' + p.texture;
       faceInfoEl.classList.add('visible');
     });
     el.addEventListener('mouseleave', function() {
       faceInfoEl.classList.remove('visible');
     });
   }
+
+  // ── Renderer facade (R) — shared API for Exporter, Snap, etc. ──
+  var R = {
+    render:            render,
+    getStructW:        getStructW,
+    getStructH:        getStructH,
+    getFaceTransform:  getFaceTransform,
+    getLidBaseTransform: getLidBaseTransform,
+    getHingeOrigin:    getHingeOrigin,
+    getHingeOpen:      getHingeOpen,
+    getTextureBg:      getTextureBg,
+    getPaneRotSuffix:  getPaneRotSuffix,
+    applyPaneSpin:     applyPaneSpin,
+    addLabels:         addLabels,
+    addPaneListeners:  addPaneListeners,
+    renderOrb:         renderOrb,
+    renderPyramid:     renderPyramid
+  };
+  M.R = R;  // also available through the model facade
 
   // ════════════════════════════════════════════════════
   //  SYNC UI FROM MODEL
@@ -2590,17 +3523,20 @@
   //  EXPORT
   // ════════════════════════════════════════════════════
 
-  document.getElementById('export-btn').addEventListener('click', function() {
-    var name = prompt('Variant name (e.g. "double-door", "sconce"):', 'custom');
-    if (!name) return;
+  /**
+   * Generate the full CSS export string for the current project.
+   * @param {string} name — Variant name (e.g. "chest-template", "bookshelf")
+   * @returns {{ css: string, pf: string }} — The CSS string and the slugified prefix
+   */
+  function generateExportCSS(name) {
     var pf = name.toLowerCase().replace(/\s+/g, '-');
     var W = shell.bw, H = shell.bh, D = shell.bd;
     var lids = panes.filter(function(p) { return p.role === 'lid'; });
-    var structs = panes.filter(function(p) { return p.structural; });
-    var decors = panes.filter(function(p) { return p.role === 'decor' && !p.structural; });
+    var structs = panes.filter(function(p) { return p.structural && p.role !== 'lid'; });
+    var extras = panes.filter(function(p) { return !p.structural && p.role !== 'lid'; });
 
     var css = '/* === Variant: ' + name + ' (' + W + 'x' + H + ', depth ' + (D*2) + ') === */\n';
-    css += '/* Generated by BoxForge v1.0 — ' + panes.length + ' panes, ' + lids.length + ' lid(s) */\n\n';
+    css += '/* Generated by BoxForge v1.0 — ' + panes.length + ' panes (' + structs.length + ' struct, ' + lids.length + ' lid, ' + extras.length + ' extra) */\n\n';
 
     css += '.box3d-wrap.' + pf + '-variant {\n';
     css += '  --' + pf + '-w: ' + W + 'px;\n';
@@ -2615,6 +3551,7 @@
     css += '  --box-ceil: ' + colors.cCeil + ';\n';
     css += '  --box-glow: rgba(' + hexRgb(colors.cGlow) + ',0.6);\n';
     css += '  --perspective: ' + shell.persp + 'px;\n';
+    css += '  perspective: ' + shell.persp + 'px;\n';
     css += '  width: ' + W + 'px;\n';
     css += '  height: ' + H + 'px;\n';
     css += '}\n';
@@ -2624,67 +3561,109 @@
     css += '}\n';
     css += '.box3d-wrap.' + pf + '-variant .box3d-spin {\n';
     css += '  width: ' + W + 'px; height: ' + H + 'px;\n';
+    css += '}\n';
+    css += '.' + pf + '-variant .box3d-body {\n';
+    css += '  width: ' + W + 'px; height: ' + H + 'px;\n';
     css += '}\n\n';
 
     // Structural faces
+    var _faceCount = {};  // track duplicates per face name
     structs.forEach(function(p) {
       var pw = getStructW(p), ph = getStructH(p);
-      var tfm = getFaceTransform(p.face, W, H, D, p.ox, p.oy);
-      css += '/* ' + p.name + ' (' + p.face + '): ' + pw + ' x ' + ph + ' */\n';
-      css += '.box3d-wrap.' + pf + '-variant .bf-' + p.face + ' {\n';
+      var tfm = getFaceTransform(p.face, W, H, D, p.ox, p.oy, p.oz) + getPaneRotSuffix(p);
+      // Unique class: bf-{face} for first, bf-{face}-2 for second, etc.
+      _faceCount[p.face] = (_faceCount[p.face] || 0) + 1;
+      var faceClass = 'bf-' + p.face + (_faceCount[p.face] > 1 ? '-' + _faceCount[p.face] : '');
+      css += '/* ' + p.name + ' (' + p.face + '): ' + pw + ' x ' + ph;
+      if (p.biomeTag) css += ' [biome: ' + p.biomeTag + ']';
+      if (p.labelText) css += ' [label: "' + p.labelText + '" dir:' + p.labelDir + ' ' + p.labelSize + 'px]';
+      css += ' */\n';
+      var centerL = (W - pw) / 2, centerT = (H - ph) / 2;
+      css += '.box3d-wrap.' + pf + '-variant .' + faceClass + ' {\n';
       css += '  width: ' + pw + 'px; height: ' + ph + 'px;\n';
+      if (centerL || centerT) css += '  left: ' + centerL + 'px; top: ' + centerT + 'px;\n';
+      css += '  background: ' + getTextureBg(p) + ';\n';
       css += '  transform: ' + tfm + ';\n';
+      if (p.alpha < 100) css += '  opacity: ' + (p.alpha / 100) + ';\n';
       if (p.borderRadius) css += '  border-radius: ' + p.borderRadius + '%;\n';
       if (p.texture === 'hidden') css += '  display: none;\n';
+      if (p.wiring) css += '  /* wiring: ' + p.wiring.replace(/\n/g, ' | ') + ' */\n';
       css += '}\n';
     });
 
     // Lids
     lids.forEach(function(p, i) {
       var pw = p.pw, ph = p.ph;
-      var lidBase = getLidBaseTransform(p.face, W, H, D, p.ox, p.oy, pw, ph);
+      var lidBase = getLidBaseTransform(p.face, W, H, D, p.ox, p.oy, pw, ph, p.oz) + getPaneRotSuffix(p);
       var origin = getHingeOrigin(p.hinge, pw, ph);
       var openTfm = getHingeOpen(p.hinge, p.angle, true, false, p.hoverAngle);
       var hoverTfm = getHingeOpen(p.hinge, p.angle, false, true, p.hoverAngle);
       var lidSel = lids.length > 1 ? '--' + i : '';
+      var centerL = (W - pw) / 2, centerT = (H - ph) / 2;
 
       css += '\n/* Lid: ' + p.name + ' (' + pw + 'x' + ph + ', hinge: ' + p.hinge + ', open: ' + p.angle + '\u00b0, hover: ' + p.hoverAngle + '\u00b0)';
       if (p.biomeTag) css += ' [biome: ' + p.biomeTag + ']';
       if (p.labelText) css += ' [label: "' + p.labelText + '" dir:' + p.labelDir + ' ' + p.labelSize + 'px]';
       css += ' */\n';
-      css += '.box3d-wrap.' + pf + '-variant .box3d-lid' + lidSel + ' {\n';
+      // Wrapper: face positioning (default transform-origin = center = body center)
+      css += '.box3d-wrap.' + pf + '-variant .box3d-lid-wrap' + lidSel + ' {\n';
+      css += '  position: absolute; transform-style: preserve-3d;\n';
       css += '  width: ' + pw + 'px; height: ' + ph + 'px;\n';
-      if (p.borderRadius) css += '  border-radius: ' + p.borderRadius + '%;\n';
-      css += '  transform-origin: ' + origin + ';\n';
+      if (centerL || centerT) css += '  left: ' + centerL + 'px; top: ' + centerT + 'px;\n';
       css += '  transform: ' + lidBase + ';\n';
       css += '}\n';
-      css += '.box3d-wrap.' + pf + '-variant:hover .box3d-lid' + lidSel + ' {\n';
-      css += '  transform: ' + lidBase + ' ' + hoverTfm + ';\n';
+      // Inner pane: hinge animation (origin = hinge edge)
+      css += '.box3d-wrap.' + pf + '-variant .box3d-lid' + lidSel + ' {\n';
+      css += '  width: ' + pw + 'px; height: ' + ph + 'px;\n';
+      css += '  background: ' + getTextureBg(p) + ';\n';
+      if (p.alpha < 100) css += '  opacity: ' + (p.alpha / 100) + ';\n';
+      if (p.borderRadius) css += '  border-radius: ' + p.borderRadius + '%;\n';
+      css += '  transform-origin: ' + origin + ';\n';
+      css += '  transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);\n';
+      if (p.wiring) css += '  /* wiring: ' + p.wiring.replace(/\n/g, ' | ') + ' */\n';
+      css += '}\n';
+      css += '.box3d-wrap.' + pf + '-variant.hovered .box3d-lid' + lidSel + ' {\n';
+      css += '  transform: ' + hoverTfm + ';\n';
       css += '}\n';
       css += '.box3d-wrap.' + pf + '-variant.opened .box3d-lid' + lidSel + ' {\n';
-      css += '  transform: ' + lidBase + ' ' + openTfm + ';\n';
+      css += '  transform: ' + openTfm + ';\n';
       css += '}\n';
     });
 
-    // Decor panes (cosmetic, non-structural, non-lid)
-    if (decors.length) {
-      css += '\n/* === DECOR PANES (' + decors.length + ') === */\n';
-      decors.forEach(function(p, i) {
+    // Extra panes (non-structural, non-lid — includes decor and repurposed panes)
+    if (extras.length) {
+      css += '\n/* === EXTRA PANES (' + extras.length + ') === */\n';
+      extras.forEach(function(p, i) {
         var pw = p.pw, ph = p.ph;
-        var tfm = getFaceTransform(p.face, W, H, D, p.ox, p.oy);
-        css += '.' + pf + '-decor-' + i + ' { /* ' + p.name + ' (' + p.face + ', ' + pw + 'x' + ph + ') */\n';
+        var tfm = getFaceTransform(p.face, W, H, D, p.ox, p.oy, p.oz) + getPaneRotSuffix(p);
+        // Track face duplicates across struct + extra
+        _faceCount[p.face] = (_faceCount[p.face] || 0) + 1;
+        var faceClass = 'bf-' + p.face + (_faceCount[p.face] > 1 ? '-' + _faceCount[p.face] : '');
+        var centerL = (W - pw) / 2, centerT = (H - ph) / 2;
+        css += '/* ' + p.name + ' (' + p.face + ', ' + pw + 'x' + ph + ', role: ' + p.role + ') */\n';
+        css += '.box3d-wrap.' + pf + '-variant .' + faceClass + ' {\n';
         css += '  width: ' + pw + 'px; height: ' + ph + 'px;\n';
+        if (centerL || centerT) css += '  left: ' + centerL + 'px; top: ' + centerT + 'px;\n';
         css += '  transform: ' + tfm + ';\n';
-        if (p.color) css += '  background: ' + p.color + ';\n';
+        css += '  background: ' + getTextureBg(p) + ';\n';
         if (p.alpha < 100) css += '  opacity: ' + (p.alpha / 100) + ';\n';
         if (p.borderRadius) css += '  border-radius: ' + p.borderRadius + '%;\n';
         if (p.texture === 'hidden') css += '  display: none;\n';
         if (p.spinX || p.spinY) {
-          css += '  animation: ' + pf + '-decor-spin-' + i + ' ' + Math.round(360 / Math.max(p.spinX || 1, p.spinY || 1)) + 's linear infinite;\n';
+          css += '  animation: ' + pf + '-extra-spin-' + i + ' ' + Math.round(360 / Math.max(p.spinX || 1, p.spinY || 1)) + 's linear infinite;\n';
         }
         if (p.labelText) css += '  /* label: "' + p.labelText + '" dir:' + p.labelDir + ' ' + p.labelSize + 'px */\n';
         if (p.biomeTag) css += '  /* biome: ' + p.biomeTag + ' */\n';
+        if (p.wiring) css += '  /* wiring: ' + p.wiring.replace(/\n/g, ' | ') + ' */\n';
         css += '}\n';
+        // Emit @keyframes for spinning extra panes
+        if (p.spinX || p.spinY) {
+          var kfName = pf + '-extra-spin-' + i;
+          css += '@keyframes ' + kfName + ' {\n';
+          css += '  from { transform: ' + tfm + '; }\n';
+          css += '  to { transform: ' + tfm + ' rotateX(' + (p.spinX ? 360 : 0) + 'deg) rotateY(' + (p.spinY ? 360 : 0) + 'deg); }\n';
+          css += '}\n';
+        }
       });
     }
 
@@ -2731,7 +3710,7 @@
       css += '}\n';
       var p2 = orbConfig.p2;
       css += '/* Phase 2 (hover): */\n';
-      css += '.box3d-wrap.' + pf + '-variant:hover .' + pf + '-orb {\n';
+      css += '.box3d-wrap.' + pf + '-variant.hovered .' + pf + '-orb {\n';
       css += emitOrbVars(p2);
       css += '  transform: translateZ(' + p2.z + 'px);\n';
       css += '}\n';
@@ -2790,7 +3769,7 @@
       }
       if (pp2) {
         css += '/* Phase 2 (hover): */\n';
-        css += '.box3d-wrap.' + pf + '-variant:hover .' + pf + '-pyramid {\n';
+        css += '.box3d-wrap.' + pf + '-variant.hovered .' + pf + '-pyramid {\n';
         css += '  --pyr-w: ' + pp2.size + 'px; --pyr-h: ' + (pp2.height > 0 ? pp2.height : pp2.size) + 'px;\n';
         css += '  --pyr-spread: ' + (pp2.spread != null ? pp2.spread : 30) + 'deg; --pyr-speed: ' + pp2.speed + 's;\n';
         css += '  --pyr-color1: ' + pp2.color1 + '; --pyr-color2: ' + pp2.color2 + '; --pyr-color3: ' + pp2.color3 + ';\n';
@@ -2822,7 +3801,6 @@
         css += '  transform: translateZ(' + g.oz + 'px) rotateX(' + g.rotX + 'deg) rotateY(' + g.rotY + 'deg);\n';
         css += '  background: radial-gradient(' + g.shape + ', rgba(' + gr + ',' + gg + ',' + gb + ',' + (g.alpha/100) + ') 0%, transparent 70%);\n';
         css += '  filter: blur(' + g.blur + 'px);\n';
-        css += '  border-radius: 50%;\n';
         css += '  pointer-events: none;\n';
         if (g.spinX || g.spinY) {
           css += '  animation: ' + pf + '-glow-spin-' + i + ' ' + Math.round(360 / Math.max(g.spinX || 1, g.spinY || 1)) + 's linear infinite;\n';
@@ -2833,25 +3811,60 @@
           css += '  to { transform: translateZ(' + g.oz + 'px) rotateX(' + (g.rotX + (g.spinX ? 360 : 0)) + 'deg) rotateY(' + (g.rotY + (g.spinY ? 360 : 0)) + 'deg); }\n';
           css += '}\n';
         }
+        if (g.child && g.child.text) {
+          var cp1 = g.child.p1, cp2 = g.child.p2, cp3 = g.child.p3;
+          css += '/* Glow child: "' + g.child.text + '" */\n';
+
+          // Base style + P1 (idle) state
+          css += '.' + pf + '-glow-child-' + i + ' {\n';
+          css += '  position: absolute;\n';
+          css += '  left: 50%; top: 50%;\n';
+          css += '  pointer-events: none;\n';
+          css += '  line-height: 1; white-space: nowrap;\n';
+          css += '  transition: all 0.4s cubic-bezier(0.33,1,0.68,1);\n';
+          css += '  text-shadow: 0 0 12px rgba(' + gr + ',' + gg + ',' + gb + ',0.5);\n';
+          css += '  font-size: ' + cp1.size + 'px;\n';
+          css += '  opacity: ' + (cp1.alpha / 100) + ';\n';
+          css += '  transform: translate(-50%,-50%) translateY(' + cp1.oy + 'px) translateZ(' + (g.oz + cp1.oz) + 'px) rotateX(' + (g.rotX + (cp1.rotX || 0)) + 'deg) rotateY(' + (g.rotY + (cp1.rotY || 0)) + 'deg);\n';
+          css += '}\n';
+
+          // P2 (hover) state
+          css += '.box3d-wrap.' + pf + '-variant.hovered .' + pf + '-glow-child-' + i + ' {\n';
+          css += '  font-size: ' + cp2.size + 'px;\n';
+          css += '  opacity: ' + (cp2.alpha / 100) + ';\n';
+          css += '  transform: translate(-50%,-50%) translateY(' + cp2.oy + 'px) translateZ(' + (g.oz + cp2.oz) + 'px) rotateX(' + (g.rotX + (cp2.rotX || 0)) + 'deg) rotateY(' + (g.rotY + (cp2.rotY || 0)) + 'deg);\n';
+          css += '}\n';
+
+          // P3 (open/activated) state
+          css += '.box3d-wrap.' + pf + '-variant.opened .' + pf + '-glow-child-' + i + ' {\n';
+          css += '  font-size: ' + cp3.size + 'px;\n';
+          css += '  opacity: ' + (cp3.alpha / 100) + ';\n';
+          css += '  transform: translate(-50%,-50%) translateY(' + cp3.oy + 'px) translateZ(' + (g.oz + cp3.oz) + 'px) rotateX(' + (g.rotX + (cp3.rotX || 0)) + 'deg) rotateY(' + (g.rotY + (cp3.rotY || 0)) + 'deg);\n';
+          css += '}\n';
+        }
       });
       css += '\n';
     }
 
     // Phase animation toggles export
     var PA_KEYS = ['squish','bounce','poke','spin','tilt','glow'];
+    var INTENSITY_KEYS = ['squish','bounce','poke'];
     var hasAnyPhaseAnims = ['p1','p2','p3'].some(function(pk) {
       var pa = phaseAnims[pk];
-      return pa && PA_KEYS.some(function(k) { return pa[k]; });
+      return pa && PA_KEYS.some(function(k) { return pa[k] > 0; });
     });
     if (hasAnyPhaseAnims) {
       css += '\n/* === PHASE ANIMATIONS (applied to wrapper) === */\n';
       ['p1','p2','p3'].forEach(function(pk, idx) {
         var pa = phaseAnims[pk];
         if (!pa) return;
-        var active = PA_KEYS.filter(function(k) { return pa[k]; });
+        var active = PA_KEYS.filter(function(k) { return pa[k] > 0; });
         if (active.length) {
           var label = idx === 0 ? 'Phase 1' : idx === 1 ? 'Phase 2' : 'Phase 3';
-          css += '/* ' + label + ': ' + active.join(', ') + ' */\n';
+          var details = active.map(function(k) {
+            return INTENSITY_KEYS.indexOf(k) >= 0 ? k + ':' + pa[k] + '%' : k;
+          });
+          css += '/* ' + label + ': ' + details.join(', ') + ' */\n';
         }
       });
       css += '\n';
@@ -2886,13 +3899,362 @@
       css += ' */\n';
     }
 
+    return { css: css, pf: pf };
+  }
+
+  document.getElementById('export-btn').addEventListener('click', function() {
+    var name = prompt('Variant name (e.g. "double-door", "sconce"):', 'custom');
+    if (!name) return;
+    var result = generateExportCSS(name);
     var out = document.getElementById('export-output');
-    out.textContent = css;
+    out.textContent = result.css;
     out.style.display = 'block';
-    navigator.clipboard.writeText(css).then(function() {
+    navigator.clipboard.writeText(result.css).then(function() {
       document.getElementById('export-btn').textContent = 'Copied!';
       setTimeout(function() { document.getElementById('export-btn').textContent = 'Export CSS'; }, 1500);
     });
+  });
+
+  // ════════════════════════════════════════════════════
+  //  PREVIEW EXPORT
+  // ════════════════════════════════════════════════════
+
+  /**
+   * Generate phase-animation @keyframes CSS for the preview page.
+   * Uses the same intensity math as the editor's dynamic keyframes.
+   * @param {string} pf — slugified variant prefix
+   * @returns {string} — CSS @keyframes + phase-application rules
+   */
+  function generatePhaseKeyframesCSS(pf) {
+    var PA_KEYS = ['squish','bounce','poke'];
+    var TIMING = {
+      squish: { dur: '1.6s', ease: 'ease-in-out' },
+      bounce: { dur: '0.8s', ease: 'cubic-bezier(0.34,1.56,0.64,1)' },
+      poke:   { dur: '0.6s', ease: 'cubic-bezier(0.34,1.56,0.64,1)' }
+    };
+    var css = '';
+    var emittedKf = {};
+
+    ['p1','p2','p3'].forEach(function(pk, idx) {
+      var pa = phaseAnims[pk];
+      if (!pa) return;
+      PA_KEYS.forEach(function(k) {
+        var intensity = pa[k] || 0;
+        if (intensity <= 0) return;
+        var kfName = pf + '-' + k + '-' + intensity;
+        if (!emittedKf[kfName]) {
+          emittedKf[kfName] = true;
+          var kf = generateIntensityKeyframes(intensity)[k];
+          css += kf.replace('wb-box-' + k + '-i', kfName);
+        }
+      });
+    });
+
+    // Phase application rules — JS toggles .phase-1 / .phase-2 / .phase-3 on body-anim
+    ['p1','p2','p3'].forEach(function(pk, idx) {
+      var pa = phaseAnims[pk];
+      if (!pa) return;
+      var active = PA_KEYS.filter(function(k) { return (pa[k] || 0) > 0; });
+      if (!active.length) return;
+      var phaseClass = 'phase-' + (idx + 1);
+      // Use the first active anim (priority: squish > bounce > poke)
+      var primary = active[0];
+      var intensity = pa[primary];
+      var kfName = pf + '-' + primary + '-' + intensity;
+      var timing = TIMING[primary];
+      // Scale duration inversely with intensity for higher-intensity anims
+      var dur = primary === 'squish' ? (1.6 - intensity * 0.002).toFixed(1) + 's' : timing.dur;
+      css += '.' + pf + '-variant .box3d-body.' + phaseClass + ' {\n';
+      css += '  animation: ' + kfName + ' ' + dur + ' ' + timing.ease + ' infinite;\n';
+      css += '}\n';
+    });
+
+    return css;
+  }
+
+  /**
+   * Generate the HTML structure for all panes, glows, and glow children.
+   * @param {string} pf — slugified variant prefix
+   * @returns {string} — inner HTML for the box3d-body div
+   */
+  function generatePreviewHTML(pf) {
+    var structs = panes.filter(function(p) { return p.structural && p.role !== 'lid'; });
+    var lids = panes.filter(function(p) { return p.role === 'lid'; });
+    var extras = panes.filter(function(p) { return !p.structural && p.role !== 'lid'; });
+    var html = '';
+    var _fc = {};
+
+    // Structural panes
+    if (structs.length) html += '          <!-- Structural panes (' + structs.length + ') -->\n';
+    structs.forEach(function(p) {
+      _fc[p.face] = (_fc[p.face] || 0) + 1;
+      var cls = 'bf-' + p.face + (_fc[p.face] > 1 ? '-' + _fc[p.face] : '');
+      html += '          <div class="' + cls + '"></div>\n';
+    });
+
+    // Lids
+    if (lids.length) html += '          <!-- Lid (' + lids.length + ') -->\n';
+    lids.forEach(function(p, i) {
+      var lidSel = lids.length > 1 ? '--' + i : '';
+      html += '          <div class="box3d-lid-wrap' + lidSel + '"><div class="box3d-lid' + lidSel + '"></div></div>\n';
+    });
+
+    // Extra panes
+    if (extras.length) html += '          <!-- Extra panes (' + extras.length + ') -->\n';
+    extras.forEach(function(p) {
+      _fc[p.face] = (_fc[p.face] || 0) + 1;
+      var cls = 'bf-' + p.face + (_fc[p.face] > 1 ? '-' + _fc[p.face] : '');
+      html += '          <div class="' + cls + '"></div>\n';
+    });
+
+    // Glow sources
+    if (glows.length) html += '          <!-- Glow sources (' + glows.length + ') -->\n';
+    glows.forEach(function(g, i) {
+      html += '          <div class="' + pf + '-glow-' + i + '"></div>\n';
+      // Glow child as sibling (not inside blurred glow)
+      if (g.child && g.child.text) {
+        html += '          <!-- Glow child (' + g.child.text + ') -->\n';
+        html += '          <span class="' + pf + '-glow-child-' + i + '">' + g.child.text + '</span>\n';
+      }
+    });
+
+    return html;
+  }
+
+  document.getElementById('preview-export-btn').addEventListener('click', function() {
+    var name = prompt('Variant name for preview:', 'custom');
+    if (!name) return;
+    var result = generateExportCSS(name);
+    var pf = result.pf;
+    var W = shell.bw, H = shell.bh;
+    var phaseKf = generatePhaseKeyframesCSS(pf);
+    var bodyHTML = generatePreviewHTML(pf);
+
+    // Build the export values info line
+    var structs = panes.filter(function(p) { return p.structural && p.role !== 'lid'; });
+    var lids = panes.filter(function(p) { return p.role === 'lid'; });
+    var extras = panes.filter(function(p) { return !p.structural && p.role !== 'lid'; });
+
+    // Preview dimensions — slightly larger than the box
+    var previewW = Math.max(700, W + 200);
+    var previewH = Math.max(550, shell.bh + 360);
+
+    var page = '<!DOCTYPE html>\n';
+    page += '<html lang="en">\n<head>\n<meta charset="UTF-8">\n';
+    page += '<title>' + name + ' — BoxForge Export Gap Check</title>\n';
+    page += '<style>\n';
+    page += '  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n';
+    page += '  body {\n';
+    page += '    font-family: \'Segoe UI\', system-ui, sans-serif;\n';
+    page += '    background: #111; color: #ddd;\n';
+    page += '    display: flex; flex-direction: column;\n';
+    page += '    align-items: center; justify-content: center;\n';
+    page += '    min-height: 100vh; gap: 16px;\n';
+    page += '  }\n';
+    page += '  h1 { font-size: 14px; color: #888; letter-spacing: 1px; text-transform: uppercase; }\n';
+    page += '  .info { font-size: 11px; color: #666; max-width: 600px; text-align: center; line-height: 1.5; }\n';
+    page += '  .phase-btns { display: flex; gap: 6px; }\n';
+    page += '  .phase-btns button {\n';
+    page += '    padding: 4px 16px; font-size: 11px; font-weight: 600;\n';
+    page += '    background: #1a1a28; color: #888; border: 1px solid #333;\n';
+    page += '    border-radius: 4px; cursor: pointer;\n';
+    page += '  }\n';
+    page += '  .phase-btns button.active { background: #2a1e3a; color: #cc88ff; border-color: #7744aa; }\n';
+    page += '  .preview {\n';
+    page += '    display: flex; align-items: center; justify-content: center;\n';
+    page += '    width: ' + previewW + 'px; height: ' + previewH + 'px;\n';
+    page += '    background:\n';
+    page += '      radial-gradient(circle at 50% 50%, rgba(40,40,60,0.4) 0%, transparent 60%),\n';
+    page += '      repeating-linear-gradient(0deg, transparent 0px, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px),\n';
+    page += '      repeating-linear-gradient(90deg, transparent 0px, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px),\n';
+    page += '      #111;\n';
+    page += '    border: 1px solid #222; border-radius: 8px; position: relative;\n';
+    page += '  }\n\n';
+
+    // Shared 3D box scaffold
+    page += '  /* Shared 3D box scaffold */\n';
+    page += '  .box3d-wrap { position: relative; transform-style: preserve-3d; }\n';
+    page += '  .box3d-scene { position: relative; transform-style: preserve-3d; }\n';
+    page += '  .box3d-spin { transform-style: preserve-3d; position: absolute; width: 100%; height: 100%; }\n';
+    page += '  .box3d-body { transform-style: preserve-3d; position: absolute; width: 100%; height: 100%; }\n';
+    page += '  [class*="bf-"], .box3d-lid { position: absolute; transform-style: preserve-3d; border: 2px solid var(--box-dark2); }\n\n';
+
+    // Glow source base selector
+    page += '  [class*="' + pf + '-glow-"] { position: absolute; pointer-events: none; }\n\n';
+
+    // Variant CSS (from export)
+    page += result.css + '\n';
+
+    // Phase animation keyframes
+    if (phaseKf) {
+      page += '  /* Phase animation keyframes */\n';
+      page += phaseKf + '\n';
+    }
+
+    page += '</style>\n</head>\n<body>\n\n';
+    page += '<h1>' + name + ' — Export Gap Check</h1>\n';
+    page += '<div class="info">\n';
+    page += '  Compare this static render (built from CSS export) against the live BoxForge editor.<br>\n';
+    page += '  Click phase buttons or hover/click the box to toggle states.\n';
+    page += '</div>\n\n';
+    page += '<div class="phase-btns">\n';
+    page += '  <button class="active" data-phase="1">P1 Idle</button>\n';
+    page += '  <button data-phase="2">P2 Hover</button>\n';
+    page += '  <button data-phase="3">P3 Open</button>\n';
+    page += '</div>\n\n';
+    page += '<div class="preview">\n';
+    page += '  <div class="box3d-wrap ' + pf + '-variant" id="box">\n';
+    page += '    <div class="box3d-scene">\n';
+    page += '      <div class="box3d-spin">\n';
+    page += '        <div class="box3d-body phase-1" id="body-anim">\n';
+    page += bodyHTML;
+    page += '        </div>\n';
+    page += '      </div>\n';
+    page += '    </div>\n';
+    page += '  </div>\n';
+    page += '</div>\n\n';
+
+    // Export values info
+    page += '<div class="info" style="margin-top:8px;color:#555">\n';
+    page += '  <strong>Export values (from BoxForge v2):</strong><br>\n';
+    page += '  Shell: ' + W + '×' + shell.bh + ', depth ' + (shell.bd*2) + ' (half ' + shell.bd + '), perspective ' + shell.persp + ', camera ' + shell.rx + '°/' + shell.ry + '°<br>\n';
+    page += '  Colors: dark ' + colors.cDark + ', light ' + colors.cLight + ', floor ' + colors.cFloor + ', ceil ' + colors.cCeil + ', glow ' + colors.cGlow + '<br>\n';
+    page += '  Panes: ' + panes.length + ' total (' + structs.length + ' struct, ' + lids.length + ' lid, ' + extras.length + ' extra)\n';
+    page += '</div>\n\n';
+
+    // Phase toggle script
+    page += '<script>\n';
+    page += '(function() {\n';
+    page += '  \'use strict\';\n';
+    page += '  var boxEl = document.getElementById(\'box\');\n';
+    page += '  var bodyEl = document.getElementById(\'body-anim\');\n';
+    page += '  var btns = document.querySelectorAll(\'.phase-btns button\');\n\n';
+    page += '  function setPhase(phase) {\n';
+    page += '    bodyEl.className = \'box3d-body phase-\' + phase;\n';
+    page += '    boxEl.classList.remove(\'hovered\', \'opened\');\n';
+    page += '    if (phase === \'2\') boxEl.classList.add(\'hovered\');\n';
+    page += '    if (phase === \'3\') boxEl.classList.add(\'opened\');\n';
+    page += '    btns.forEach(function(b) {\n';
+    page += '      b.classList.toggle(\'active\', b.dataset.phase === phase);\n';
+    page += '    });\n';
+    page += '  }\n\n';
+    page += '  btns.forEach(function(b) {\n';
+    page += '    b.addEventListener(\'click\', function() { setPhase(b.dataset.phase); });\n';
+    page += '  });\n\n';
+    page += '  boxEl.addEventListener(\'mouseenter\', function() {\n';
+    page += '    var activeBtn = document.querySelector(\'.phase-btns button.active\');\n';
+    page += '    if (activeBtn && activeBtn.dataset.phase !== \'3\') setPhase(\'2\');\n';
+    page += '  });\n';
+    page += '  boxEl.addEventListener(\'mouseleave\', function() {\n';
+    page += '    var activeBtn = document.querySelector(\'.phase-btns button.active\');\n';
+    page += '    if (activeBtn && activeBtn.dataset.phase === \'2\') setPhase(\'1\');\n';
+    page += '  });\n';
+    page += '  boxEl.addEventListener(\'click\', function() { setPhase(\'3\'); });\n\n';
+    page += '  setPhase(\'1\');\n';
+    page += '})();\n';
+    page += '<\/script>\n';
+    page += '</body>\n</html>\n';
+
+    // Open in new tab via blob URL
+    var blob = new Blob([page], { type: 'text/html' });
+    var url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  });
+
+  // ════════════════════════════════════════════════════
+  //  UNDO SYSTEM
+  // ════════════════════════════════════════════════════
+
+  var _undoStack = [];
+  var _UNDO_MAX = 40;
+  var _undoThrottle = 0;
+
+  function pushUndo() {
+    var now = Date.now();
+    // Throttle: skip if less than 300ms since last push (rapid slider drags)
+    if (now - _undoThrottle < 300 && _undoStack.length > 0) return;
+    _undoThrottle = now;
+    var snapshot = JSON.stringify({
+      shell: shell,
+      colors: colors,
+      panes: panes,
+      glows: glows,
+      orbConfig: orbConfig,
+      pyramidConfig: pyramidConfig,
+      phaseAnims: phaseAnims,
+      phaseMode: phaseMode,
+      orbOnly: orbOnly,
+      pyrPrimary: pyrPrimary,
+      currentState: currentState
+    });
+    _undoStack.push(snapshot);
+    if (_undoStack.length > _UNDO_MAX) _undoStack.shift();
+    _updateUndoBtn();
+  }
+
+  function popUndo() {
+    if (_undoStack.length === 0) return;
+    var snapshot = JSON.parse(_undoStack.pop());
+    shell = snapshot.shell;
+    colors = snapshot.colors;
+    _nextId = 1;
+    panes = snapshot.panes.map(function(p) {
+      var restored = makePane(p);
+      restored.id = p.id;
+      if (p.id >= _nextId) _nextId = p.id + 1;
+      // Preserve override flags
+      if (p._pwOverride) restored._pwOverride = true;
+      if (p._phOverride) restored._phOverride = true;
+      return restored;
+    });
+    glows = snapshot.glows.map(function(g) { return makeGlow(g); });
+    _nextGlowId = 1;
+    glows.forEach(function(g) { if (g.id >= _nextGlowId) _nextGlowId = g.id + 1; });
+    orbConfig = snapshot.orbConfig;
+    pyramidConfig = snapshot.pyramidConfig;
+    phaseAnims = snapshot.phaseAnims;
+    phaseMode = snapshot.phaseMode || 'box';
+    orbOnly = !!snapshot.orbOnly;
+    pyrPrimary = !!snapshot.pyrPrimary;
+    currentState = snapshot.currentState || 'p1';
+    // Re-sync UI
+    if (selectedPaneId) {
+      var p = getPaneById(selectedPaneId);
+      if (p) selectPane(selectedPaneId);
+      else { selectedPaneId = null; panePropsEl.classList.remove('visible'); }
+    }
+    if (selectedGlowId) {
+      var g = getGlowById(selectedGlowId);
+      if (g) selectGlow(selectedGlowId);
+      else { selectedGlowId = null; }
+    }
+    syncShellToUI();
+    syncColorsToUI();
+    renderPaneList();
+    renderGlowList();
+    syncOrbUI();
+    syncPyrUI();
+    syncGlowChildUI();
+    render();
+    _updateUndoBtn();
+  }
+
+  function _updateUndoBtn() {
+    var btn = document.getElementById('undo-btn');
+    btn.style.color = _undoStack.length ? '#cc88ff' : '#666';
+    btn.style.borderColor = _undoStack.length ? '#7744aa' : '#333';
+  }
+
+  document.getElementById('undo-btn').addEventListener('click', popUndo);
+
+  // Ctrl+Z keyboard shortcut
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      var tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return; // don't hijack native undo in inputs
+      e.preventDefault();
+      popUndo();
+    }
   });
 
   // ════════════════════════════════════════════════════
@@ -2902,7 +4264,7 @@
   function serializeProject() {
     return {
       _format: 'boxforge',
-      _version: 1,
+      _version: 2,
       shell:         JSON.parse(JSON.stringify(shell)),
       colors:        JSON.parse(JSON.stringify(colors)),
       panes:         JSON.parse(JSON.stringify(panes)),
@@ -2934,6 +4296,13 @@
       if (p.id >= _nextId) _nextId = p.id + 1;
       return restored;
     });
+
+    // Migrate v1 → v2: old format had panes anchored at body (0,0).
+    // Subtract the implicit centering offset from ox/oy so they represent
+    // offset-from-face-center (the v2 semantic).
+    if (!data._version || data._version < 2) {
+      _migrateCentering();
+    }
 
     // Restore glows — rebuild through makeGlow
     _nextGlowId = 1;
@@ -2970,6 +4339,15 @@
     }
 
     phaseAnims = data.phaseAnims || defaultPhaseAnims();
+    // Backward compat: convert boolean phase anim values to numeric (0/100)
+    ['p1','p2','p3'].forEach(function(pk) {
+      if (!phaseAnims[pk]) return;
+      ['squish','bounce','poke','spin','tilt','glow'].forEach(function(k) {
+        var v = phaseAnims[pk][k];
+        if (v === true) phaseAnims[pk][k] = 100;
+        else if (v === false || v == null) phaseAnims[pk][k] = 0;
+      });
+    });
     phaseMode = data.phaseMode || 'box';
     orbOnly = !!data.orbOnly;
     pyrPrimary = !!data.pyrPrimary;
@@ -2978,7 +4356,7 @@
     // Refresh all UI (mirrors the template-click handler)
     _activeTplName = '(loaded)';
     snapshotDefaults();
-    selectedPaneId = null;
+    Sel.clear(); _syncSelCompat();
     selectedGlowId = null;
     syncShellToUI();
     syncColorsToUI();
@@ -3110,6 +4488,7 @@
         '<span class="gi-del">&times;</span>';
       div.addEventListener('click', function(e) {
         if (e.target.classList.contains('gi-del')) {
+          pushUndo();
           glows = glows.filter(function(x) { return x.id !== g.id; });
           if (selectedGlowId === g.id) { selectedGlowId = null; glowPropsEl.style.display = 'none'; }
           renderGlowList();
@@ -3124,7 +4503,7 @@
 
   function selectGlow(id) {
     selectedGlowId = id;
-    selectedPaneId = null;
+    Sel.clear(); _syncSelCompat();
     panePropsEl.classList.remove('visible');
     var g = getGlowById(id);
     if (!g) { glowPropsEl.style.display = 'none'; return; }
@@ -3145,6 +4524,8 @@
     if (shapeSel) shapeSel.value = g.shape;
     renderGlowList();
     renderPaneList();
+    updateGlowDirtyLabels();
+    syncGlowChildUI();
     render();
   }
 
@@ -3158,12 +4539,14 @@
       if (!selectedGlowId) return;
       var g = getGlowById(selectedGlowId);
       if (!g) return;
+      pushUndo();
       var key = el.dataset.gp;
       var val = el.type === 'range' || el.type === 'number' ? +el.value : el.value;
       var siblings = document.querySelectorAll('[data-gp="' + key + '"]');
       siblings.forEach(function(s) { if (s !== el) s.value = val; });
       g[key] = val;
       if (key === 'color') renderGlowList(); // update swatch
+      updateGlowDirtyLabels();
       render();
     });
   });
@@ -3172,8 +4555,76 @@
     if (g) { g.name = this.value; renderGlowList(); }
   });
 
+  // ── Glow dirty labels (click-to-revert) ──
+  var GLOW_SLIDER_KEYS = ['alpha','size','blur','ox','oy','oz','rotX','rotY','spinX','spinY'];
+
+  function getGlowDefault(glowId, key) {
+    // Match glow by index in the template default array (glows keep their original order)
+    var idx = -1;
+    for (var i = 0; i < glows.length; i++) { if (glows[i].id === glowId) { idx = i; break; } }
+    if (idx < 0 || idx >= _tplGlowDefaults.length) return null;
+    return _tplGlowDefaults[idx].hasOwnProperty(key) ? _tplGlowDefaults[idx][key] : null;
+  }
+
+  function updateGlowDirtyLabels() {
+    if (!selectedGlowId) return;
+    var g = getGlowById(selectedGlowId);
+    if (!g) return;
+    // Find label preceding each data-gp input (handles shared Color/Opacity row)
+    var allKeys = GLOW_SLIDER_KEYS.concat(['color', 'shape']);
+    allKeys.forEach(function(key) {
+      var input = document.querySelector('#glow-props [data-gp="' + key + '"]');
+      if (!input) return;
+      // Walk backward through siblings to find the label
+      var labelEl = null;
+      var prev = input.previousElementSibling;
+      while (prev) {
+        if (prev.tagName === 'LABEL') { labelEl = prev; break; }
+        prev = prev.previousElementSibling;
+      }
+      if (!labelEl) return;
+      var def = getGlowDefault(g.id, key);
+      if (def !== null) {
+        labelEl.classList.add('resettable');
+        labelEl.classList.toggle('is-dirty', g[key] !== def);
+      } else {
+        labelEl.classList.remove('resettable', 'is-dirty');
+      }
+    });
+  }
+
+  // Click-to-revert for glow labels
+  document.querySelectorAll('#glow-props .cr label').forEach(function(labelEl) {
+    labelEl.addEventListener('click', function() {
+      if (!labelEl.classList.contains('resettable')) return;
+      if (!selectedGlowId) return;
+      var g = getGlowById(selectedGlowId);
+      if (!g) return;
+      // Find the data-gp input immediately following this label (handles Color/Opacity shared row)
+      var input = labelEl.nextElementSibling;
+      while (input && !input.dataset.gp) input = input.nextElementSibling;
+      if (!input) return;
+      var key = input.dataset.gp;
+      var def = getGlowDefault(g.id, key);
+      if (def === null) return;
+      g[key] = def;
+      if (key === 'color') {
+        document.querySelector('[data-gp="color"]').value = def;
+        renderGlowList();
+      } else if (key === 'shape') {
+        var shapeSel = document.querySelector('select[data-gp="shape"]');
+        if (shapeSel) shapeSel.value = def;
+      } else {
+        setGPVal(key, def);
+      }
+      updateGlowDirtyLabels();
+      render();
+    });
+  });
+
   // Add glow button
   document.getElementById('add-glow-btn').addEventListener('click', function() {
+    pushUndo();
     var g = makeGlow({
       name: 'Glow ' + _nextGlowId,
       color: colors.cGlow,
@@ -3184,6 +4635,127 @@
     renderGlowList();
     selectGlow(g.id);
     render();
+  });
+
+  // ════════════════════════════════════════════════════
+  //  GLOW CHILD CONTROLS
+  // ════════════════════════════════════════════════════
+
+  var gcTextEl   = document.getElementById('gc-text');
+  var gcToggleEl = document.getElementById('gc-toggle');
+  var gcPhaseEl  = document.getElementById('gc-phase-props');
+
+  function syncGlowChildUI() {
+    var g = selectedGlowId ? getGlowById(selectedGlowId) : null;
+    if (!g) { gcPhaseEl.style.display = 'none'; return; }
+    var hasChild = !!g.child;
+    gcToggleEl.textContent = hasChild ? 'On' : 'Off';
+    gcToggleEl.style.color = hasChild ? '#cc88ff' : '#777';
+    gcToggleEl.style.borderColor = hasChild ? '#7744aa' : '#2a2a3a';
+    gcTextEl.value = hasChild ? g.child.text : '';
+    gcPhaseEl.style.display = hasChild ? 'block' : 'none';
+    if (hasChild) {
+      ['p1','p2','p3'].forEach(function(pk) {
+        ['size','oy','oz','alpha','rotX','rotY'].forEach(function(k) {
+          var val = g.child[pk][k];
+          document.querySelectorAll('[data-gc="' + pk + '-' + k + '"]').forEach(function(el) { el.value = val; });
+        });
+      });
+      updateGlowChildDirtyLabels();
+    }
+  }
+
+  gcToggleEl.addEventListener('click', function() {
+    var g = selectedGlowId ? getGlowById(selectedGlowId) : null;
+    if (!g) return;
+    if (g.child) {
+      g.child = null;
+    } else {
+      g.child = makeGlowChild({ text: gcTextEl.value || '🪙' });
+    }
+    syncGlowChildUI();
+    render();
+  });
+
+  gcTextEl.addEventListener('input', function() {
+    var g = selectedGlowId ? getGlowById(selectedGlowId) : null;
+    if (!g || !g.child) return;
+    g.child.text = gcTextEl.value;
+    render();
+  });
+
+  // Wire per-phase sliders
+  document.querySelectorAll('[data-gc]').forEach(function(el) {
+    el.addEventListener('input', function() {
+      var g = selectedGlowId ? getGlowById(selectedGlowId) : null;
+      if (!g || !g.child) return;
+      pushUndo();
+      var parts = el.dataset.gc.split('-');  // e.g. "p1-size"
+      var phase = parts[0];
+      var key = parts[1];
+      var val = +el.value;
+      g.child[phase][key] = val;
+      // Sync siblings
+      document.querySelectorAll('[data-gc="' + el.dataset.gc + '"]').forEach(function(s) {
+        if (s !== el) s.value = val;
+      });
+      updateGlowChildDirtyLabels();
+      render();
+    });
+  });
+
+  // ── Glow child dirty labels (click-to-revert) ──
+
+  function getGlowChildDefault(glowId, phase, key) {
+    var idx = -1;
+    for (var i = 0; i < glows.length; i++) { if (glows[i].id === glowId) { idx = i; break; } }
+    if (idx < 0 || idx >= _tplGlowDefaults.length) return null;
+    var defGlow = _tplGlowDefaults[idx];
+    if (!defGlow || !defGlow.child || !defGlow.child[phase]) return null;
+    return defGlow.child[phase].hasOwnProperty(key) ? defGlow.child[phase][key] : null;
+  }
+
+  function updateGlowChildDirtyLabels() {
+    if (!selectedGlowId) return;
+    var g = getGlowById(selectedGlowId);
+    if (!g || !g.child) return;
+    document.querySelectorAll('[data-gc]').forEach(function(el) {
+      if (el.type !== 'range') return; // only process range inputs (one per row)
+      var parts = el.dataset.gc.split('-');
+      var phase = parts[0], key = parts[1];
+      var row = el.closest('.cr');
+      if (!row) return;
+      var labelEl = row.querySelector('label');
+      if (!labelEl) return;
+      var def = getGlowChildDefault(g.id, phase, key);
+      if (def !== null) {
+        labelEl.classList.add('resettable');
+        labelEl.classList.toggle('is-dirty', g.child[phase][key] !== def);
+      } else {
+        labelEl.classList.remove('resettable', 'is-dirty');
+      }
+    });
+  }
+
+  // Click-to-revert for glow child labels
+  document.querySelectorAll('#gc-phase-props .cr label').forEach(function(labelEl) {
+    labelEl.addEventListener('click', function() {
+      if (!labelEl.classList.contains('resettable')) return;
+      var g = selectedGlowId ? getGlowById(selectedGlowId) : null;
+      if (!g || !g.child) return;
+      var row = labelEl.closest('.cr');
+      if (!row) return;
+      var input = row.querySelector('[data-gc]');
+      if (!input) return;
+      var parts = input.dataset.gc.split('-');
+      var phase = parts[0], key = parts[1];
+      var def = getGlowChildDefault(g.id, phase, key);
+      if (def === null) return;
+      g.child[phase][key] = def;
+      document.querySelectorAll('[data-gc="' + input.dataset.gc + '"]').forEach(function(s) { s.value = def; });
+      updateGlowChildDirtyLabels();
+      render();
+    });
   });
 
   // ════════════════════════════════════════════════════
@@ -3625,10 +5197,94 @@
     render();
   });
 
-  // Click preview background to deselect
+  // ════════════════════════════════════════════════════
+  //  LASSO SELECTION (marquee drag on viewport)
+  // ════════════════════════════════════════════════════
+
+  var _lassoActive = false;
+  var _lassoStart = null;   // { x, y } in preview-area coords
+  var _lassoEl = document.getElementById('lasso-rect');
+  var _previewArea = document.getElementById('preview-area');
+  var LASSO_MIN_DRAG = 5;   // px — below this, treat as a click not a drag
+
+  _previewArea.addEventListener('mousedown', function(e) {
+    // Only start lasso on left-click directly on the background / empty space
+    if (e.button !== 0) return;
+    if (e.target.closest('.pane3d') || e.target.closest('.glow3d') || e.target.closest('button')) return;
+    var rect = _previewArea.getBoundingClientRect();
+    _lassoStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    _lassoActive = false; // becomes true once drag exceeds LASSO_MIN_DRAG
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!_lassoStart) return;
+    var rect = _previewArea.getBoundingClientRect();
+    var cx = e.clientX - rect.left;
+    var cy = e.clientY - rect.top;
+    var dx = cx - _lassoStart.x;
+    var dy = cy - _lassoStart.y;
+    if (!_lassoActive && Math.sqrt(dx*dx + dy*dy) < LASSO_MIN_DRAG) return;
+    _lassoActive = true;
+    var left = Math.min(_lassoStart.x, cx);
+    var top  = Math.min(_lassoStart.y, cy);
+    var w    = Math.abs(dx);
+    var h    = Math.abs(dy);
+    _lassoEl.style.display = 'block';
+    _lassoEl.style.left = left + 'px';
+    _lassoEl.style.top  = top + 'px';
+    _lassoEl.style.width  = w + 'px';
+    _lassoEl.style.height = h + 'px';
+  });
+
+  document.addEventListener('mouseup', function(e) {
+    if (!_lassoStart) return;
+    var wasLasso = _lassoActive;
+    _lassoEl.style.display = 'none';
+    var startCopy = _lassoStart;
+    _lassoStart = null;
+
+    if (!wasLasso) { _lassoActive = false; return; }
+
+    // Compute lasso rect in viewport coords
+    var rect = _previewArea.getBoundingClientRect();
+    var cx = e.clientX - rect.left;
+    var cy = e.clientY - rect.top;
+    var lx1 = Math.min(startCopy.x, cx) + rect.left;
+    var ly1 = Math.min(startCopy.y, cy) + rect.top;
+    var lx2 = Math.max(startCopy.x, cx) + rect.left;
+    var ly2 = Math.max(startCopy.y, cy) + rect.top;
+
+    // Hit-test: any .pane3d whose screen bounding box overlaps the lasso rect
+    var hitIds = [];
+    var paneEls = _previewArea.querySelectorAll('.pane3d');
+    paneEls.forEach(function(el) {
+      var pr = el.getBoundingClientRect();
+      // Overlap test
+      if (pr.right > lx1 && pr.left < lx2 && pr.bottom > ly1 && pr.top < ly2) {
+        var id = +el.dataset.paneId;
+        if (id) hitIds.push(id);
+      }
+    });
+
+    if (hitIds.length) {
+      if (!e.shiftKey) Sel.clear();  // replace selection unless shift held
+      Sel.addAll(hitIds);
+      _syncSelCompat();
+      if (Sel._primary) selectPane(Sel._primary);
+      renderPaneList();
+      render();
+    }
+
+    // Delay clearing _lassoActive so click handler can check it
+    setTimeout(function() { _lassoActive = false; }, 0);
+  });
+
+  // Click preview background to deselect (unless lasso is active)
   document.getElementById('preview-area').addEventListener('click', function(e) {
-    if (e.target.id === 'preview-area' || e.target.closest('.box3d-wrap') && !e.target.closest('.pane3d') && !e.target.closest('.glow3d')) {
-      selectedPaneId = null;
+    if (_lassoActive) return; // lasso mouseup handles its own selection
+    if (e.target.id === 'preview-area' || e.target.id === 'lasso-rect' ||
+        e.target.closest('.box3d-wrap') && !e.target.closest('.pane3d') && !e.target.closest('.glow3d')) {
+      Sel.clear(); _syncSelCompat();
       selectedGlowId = null;
       panePropsEl.classList.remove('visible');
       glowPropsEl.style.display = 'none';
@@ -3687,14 +5343,14 @@
     fpsBar.style.background = _fpsDisplay < 24 ? '#f44' : _fpsDisplay < 45 ? '#fc6' : '#4c8';
 
     // ── DOM element counts ──
-    var sceneEls = spinEl.querySelectorAll('*');
+    var sceneEls = bodyEl.querySelectorAll('*');
     var totalDOM = sceneEls.length;
-    var paneCount = spinEl.querySelectorAll('.pane3d').length;
-    var lidCount = spinEl.querySelectorAll('.lid-wrapper').length;
-    var orbSliceCount = spinEl.querySelectorAll('.wb-orb-slice').length;
-    var orbRingCount = spinEl.querySelectorAll('.wb-orb-ring').length;
-    var labelCount = spinEl.querySelectorAll('.pane-label, .pane-dim').length;
-    var glowCount = spinEl.querySelectorAll('.glow-plane').length;
+    var paneCount = bodyEl.querySelectorAll('.pane3d').length;
+    var lidCount = bodyEl.querySelectorAll('.lid-wrapper').length;
+    var orbSliceCount = bodyEl.querySelectorAll('.wb-orb-slice').length;
+    var orbRingCount = bodyEl.querySelectorAll('.wb-orb-ring').length;
+    var labelCount = bodyEl.querySelectorAll('.pane-label, .pane-dim').length;
+    var glowCount = bodyEl.querySelectorAll('.glow-plane').length;
 
     document.getElementById('hud-dom').textContent = totalDOM;
     document.getElementById('hud-panes').textContent = paneCount + ' + ' + lidCount + ' lid';
@@ -3709,7 +5365,7 @@
       }
     }
     document.getElementById('hud-orb').textContent = orbHudText;
-    var glowCount2 = spinEl.querySelectorAll('.glow3d').length;
+    var glowCount2 = bodyEl.querySelectorAll('.glow3d').length;
     document.getElementById('hud-glows').textContent = glowCount2;
     document.getElementById('hud-labels').textContent = labelCount;
 
