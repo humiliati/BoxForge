@@ -172,6 +172,89 @@
   #add-tpl-btn { background: #1a2a1a; border: 1px dashed #336633; color: #66aa66; font-size: 10px; padding: 3px 8px; cursor: pointer; border-radius: 4px; }
   #add-tpl-btn:hover { background: #2a3a2a; color: #88cc88; border-color: #44aa44; }
 
+  /* ── Sub-Box panels ── */
+  .sub-box-section {
+    background: #16141e; border: 1px solid #3a2a5a; border-radius: 6px;
+    margin-bottom: 6px; overflow: hidden;
+  }
+  .sub-box-head {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 8px; cursor: pointer; user-select: none;
+    background: linear-gradient(135deg, #1e1a2e 0%, #1a162a 100%);
+    border-bottom: 1px solid #3a2a5a; font-size: 10.5px;
+    color: #c8a0ff; font-weight: 600; letter-spacing: 0.5px;
+    text-transform: uppercase; transition: background 0.12s;
+  }
+  .sub-box-head:hover { background: #2a2440; }
+  .sub-box-head .sb-chevron { font-size: 8px; color: #8866bb; transition: transform 0.2s; }
+  .sub-box-head.collapsed .sb-chevron { transform: rotate(-90deg); }
+  .sub-box-head .sb-pane-name { flex: 1; }
+  .sub-box-head .sb-dims { color: #7755aa; font-size: 9px; font-weight: 400; }
+  .sub-box-body { padding: 6px 8px; }
+  .sub-box-body.collapsed { display: none; }
+
+  /* ── Attachment panels (sub-orbs, sub-pyramids) ── */
+  .attach-section {
+    background: #1a1714; border: 1px solid #5a4a2a; border-radius: 6px;
+    margin-bottom: 6px; overflow: hidden;
+  }
+  .attach-head {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 8px; cursor: pointer; user-select: none;
+    background: linear-gradient(135deg, #221e14 0%, #1e1a12 100%);
+    border-bottom: 1px solid #5a4a2a; font-size: 10.5px;
+    color: #ffaa66; font-weight: 600; letter-spacing: 0.5px;
+    text-transform: uppercase; transition: background 0.12s;
+  }
+  .attach-head:hover { background: #2e2818; }
+  .attach-head .at-chevron { font-size: 8px; color: #bb8844; transition: transform 0.2s; }
+  .attach-head.collapsed .at-chevron { transform: rotate(-90deg); }
+  .attach-head .at-type { color: #ffcc88; font-size: 9px; font-weight: 400; margin-left: 4px; }
+  .attach-head .at-delete { margin-left: auto; color: #884422; font-size: 12px; cursor: pointer; padding: 0 4px; }
+  .attach-head .at-delete:hover { color: #ff6633; }
+  .attach-body { padding: 6px 8px; }
+  .attach-body.collapsed { display: none; }
+  .sb-section-label {
+    font-size: 9px; color: #7755aa; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; margin: 6px 0 3px; padding-bottom: 2px;
+    border-bottom: 1px solid #2a2240;
+  }
+  .sb-section-label:first-child { margin-top: 0; }
+  .sb-child-list { display: flex; flex-direction: column; gap: 2px; margin: 3px 0; }
+  .sb-child-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 6px; background: #1a1828; border: 1px solid #2a2240;
+    border-radius: 3px; cursor: pointer; font-size: 10.5px;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .sb-child-item:hover { border-color: #5544aa; background: #221e30; }
+  .sb-child-item.selected { border-color: #c8a0ff; background: #2a2240; }
+  .sb-child-item .sci-color {
+    width: 10px; height: 10px; border-radius: 2px;
+    border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;
+  }
+  .sb-child-item .sci-name { flex: 1; color: #bbb; }
+  .sb-child-item .sci-dims { color: #7755aa; font-size: 9px; }
+  .sb-child-item .sci-del {
+    color: #553344; font-size: 13px; cursor: pointer; padding: 0 4px;
+    line-height: 1; transition: color 0.1s;
+  }
+  .sb-child-item .sci-del:hover { color: #ff6666; }
+  .sb-add-child {
+    padding: 3px 12px; font-size: 10px; font-weight: 600; letter-spacing: 0.4px;
+    background: #1e2a3e; color: #88aacc; border: 1px solid #3a5577;
+    border-radius: 4px; cursor: pointer; transition: background 0.12s;
+    margin-top: 3px;
+  }
+  .sb-add-child:hover { background: #2a3a52; color: #aaccee; border-color: #5588aa; }
+  .sb-child-props {
+    background: #1a182a; border: 1px solid #2a2240; border-radius: 4px;
+    padding: 6px 8px; margin-top: 4px;
+  }
+  .sb-child-props .cr { height: 20px; }
+  .sb-child-props .cr label { width: 70px; color: #aa88cc; font-size: 10px; }
+  .sb-child-props .cr input[type="range"] { flex: 1; }
+
   /* ── Pane list ── */
   #pane-list {
     display: flex; flex-direction: column; gap: 2px;
@@ -283,6 +366,43 @@
       repeating-linear-gradient(90deg, transparent 0px, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px),
       #111;
   }
+
+  /* ═══ CAMERA WIDGET ═══ */
+  #cam-widget {
+    position: absolute; top: 12px; right: 12px; z-index: 100;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    user-select: none;
+  }
+  #cam-gizmo {
+    width: 72px; height: 72px; position: relative; cursor: grab;
+    border-radius: 50%; background: rgba(20,20,30,0.75);
+    border: 1px solid rgba(100,100,140,0.4);
+    transform-style: preserve-3d;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5), inset 0 0 20px rgba(60,60,100,0.2);
+  }
+  #cam-gizmo:active { cursor: grabbing; }
+  .cam-axis {
+    position: absolute; top: 50%; left: 50%;
+    transform-origin: 0 0; pointer-events: none;
+  }
+  .cam-axis-x { width: 24px; height: 2px; background: #ff4444; border-radius: 1px; }
+  .cam-axis-y { width: 24px; height: 2px; background: #44cc44; border-radius: 1px; }
+  .cam-axis-z { width: 24px; height: 2px; background: #4488ff; border-radius: 1px; }
+  .cam-label {
+    position: absolute; font-size: 10px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; pointer-events: auto;
+    text-shadow: 0 0 4px rgba(0,0,0,0.8);
+  }
+  .cam-lx { color: #ff6666; }
+  .cam-ly { color: #66dd66; }
+  .cam-lz { color: #66aaff; }
+  .cam-label:hover { transform: scale(1.4); filter: brightness(1.4); }
+  #cam-readout {
+    display: flex; gap: 6px; font-size: 9px; font-family: 'Consolas', monospace;
+    color: #666; background: rgba(15,15,20,0.7); padding: 2px 8px;
+    border-radius: 10px; border: 1px solid rgba(80,80,100,0.3);
+  }
+  #cam-readout b { color: #99aacc; }
 
   /* ═══ 3D BOX ═══ */
   .box3d-wrap {
@@ -509,8 +629,8 @@
     background: var(--bg);
   }
   @keyframes wb-orb-spin {
-    0%   { transform: rotateX(0deg) rotateY(0deg); }
-    100% { transform: rotateX(360deg) rotateY(360deg); }
+    0%   { transform: translateZ(var(--orb-z,0)) rotateX(0deg) rotateY(0deg); }
+    100% { transform: translateZ(var(--orb-z,0)) rotateX(360deg) rotateY(360deg); }
   }
   @keyframes wb-orb-ember {
     0%   { opacity: 0.3; filter: brightness(0.3); }
@@ -895,6 +1015,22 @@
       <input type="number" class="num" data-pp="labelSize" value="14">
     </div>
 
+    <div class="section-head" style="margin-top:6px">Sub-Box
+      <button id="pp-box-toggle" style="margin-left:auto;padding:2px 10px;font-size:10px">Off</button>
+    </div>
+    <div id="pp-box-hint" style="display:none;font-size:10px;color:#666;padding:2px 0">
+      Edit below in <span style="color:#c8a0ff">Sub-Box</span> panel ↓
+    </div>
+    <div class="section-head" style="margin-top:4px">Attachments
+      <span style="margin-left:auto;display:flex;gap:3px">
+        <button id="pp-attach-orb" style="padding:2px 8px;font-size:10px;background:#1a1a28;color:#ff8844;border:1px solid #553322;border-radius:3px;cursor:pointer" title="Attach a sub-orb to this pane">+ Orb</button>
+        <button id="pp-attach-pyramid" style="padding:2px 8px;font-size:10px;background:#1a1a28;color:#44bbff;border:1px solid #225577;border-radius:3px;cursor:pointer" title="Attach a sub-pyramid to this pane">+ Tri</button>
+      </span>
+    </div>
+    <div id="pp-attach-hint" style="display:none;font-size:10px;color:#666;padding:2px 0">
+      Edit below in <span style="color:#ff8844">Attachment</span> panels ↓
+    </div>
+
     <div class="section-head" style="margin-top:6px">Wiring Notes</div>
     <div style="margin-bottom:4px">
       <textarea id="pp-wiring" rows="3" placeholder="Implementation notes for export, e.g.&#10;Opens on click via .opened class toggle&#10;Uses --accent-glow CSS var for hover state"
@@ -902,6 +1038,9 @@
     </div>
   </div>
   </div><!-- /panes-section -->
+
+  <div id="sub-box-panels"></div>
+  <div id="attach-panels"></div>
 
   <div id="glow-section">
   <div class="section-head">
@@ -1211,6 +1350,22 @@
     <button data-state="opened">Phase 3 · Activated</button>
   </div>
   <!-- Phase anim toggles moved to Display sidebar section -->
+
+  <div id="cam-widget">
+    <div id="cam-gizmo">
+      <div class="cam-axis cam-axis-x"></div>
+      <div class="cam-axis cam-axis-y"></div>
+      <div class="cam-axis cam-axis-z"></div>
+      <span class="cam-label cam-lx" data-axis="x" title="Side view (Y=0, X=-90)">X</span>
+      <span class="cam-label cam-ly" data-axis="y" title="Top-down view (X=-90, Y=0)">Y</span>
+      <span class="cam-label cam-lz" data-axis="z" title="Front view (X=0, Y=0)">Z</span>
+    </div>
+    <div id="cam-readout">
+      <span id="cam-rx" title="rotateX">rx:<b>0</b></span>
+      <span id="cam-ry" title="rotateY">ry:<b>0</b></span>
+      <span id="cam-pf" title="perspective">pf:<b>800</b></span>
+    </div>
+  </div>
 
   <div class="box3d-wrap" id="box">
     <div class="box3d-scene" id="scene">
@@ -1566,8 +1721,59 @@
       labelText: opts.labelText || '',         // text rendered on the pane face
       labelDir: opts.labelDir || 'ltr',        // text direction: ltr|rtl|ttb|btt
       labelSize: opts.labelSize || 14,         // text font size in px
-      wiring:   opts.wiring || ''              // free-form JS wiring notes for export
+      wiring:   opts.wiring || '',             // free-form JS wiring notes for export
+      _pwOverride: !!opts._pwOverride,          // true if user set pw explicitly (structural)
+      _phOverride: !!opts._phOverride,          // true if user set ph explicitly (structural)
+      // Sub-box: promotes this pane to a 3D box with auto-generated edge faces.
+      // The pane itself becomes the "front" face; edges extend behind it by bd*2.
+      // All edge faces inherit the parent pane's transform chain (including lid hinge).
+      box:      opts.box ? {
+        bd:        opts.box.bd || 15,           // sub-box half-depth
+        showBack:  opts.box.showBack !== false,  // render the opposite face
+        edgeColor: opts.box.edgeColor || null,   // null = inherit pane color
+        edgeAlpha: opts.box.edgeAlpha != null ? opts.box.edgeAlpha : null, // null = inherit
+        children:  (opts.box.children || []).map(function(c) { return makePane(c); })
+      } : null,
+      // Attachments: sub-orbs, sub-pyramids, or sub-templates mounted on the pane surface.
+      // Each attachment is a child of the pane element, inheriting its full transform chain
+      // (including lid hinge animations). Use for doorknobs, decorations, mounted objects.
+      attachments: (opts.attachments || []).map(function(a) { return makeAttachment(a); })
     };
+  }
+
+  function makeAttachment(opts) {
+    var base = {
+      id:    opts.id || _nextId++,
+      type:  opts.type || 'orb',       // 'orb' | 'pyramid'
+      ox:    opts.ox || 0,
+      oy:    opts.oy || 0,
+      oz:    opts.oz != null ? opts.oz : 5,   // slightly forward from pane surface
+      rotX:  opts.rotX || 0,
+      rotY:  opts.rotY || 0,
+      rotZ:  opts.rotZ || 0,
+      scale: opts.scale != null ? opts.scale : 1
+    };
+    if (base.type === 'orb') {
+      base.size    = opts.size || 30;
+      base.rings   = opts.rings || 5;
+      base.slices  = opts.slices || 4;
+      base.palette = opts.palette || 'fire';
+      base.state   = opts.state || 'lit';
+      base.speed   = opts.speed || 8;
+    } else if (base.type === 'pyramid') {
+      base.size     = opts.size || 40;
+      base.height   = opts.height || 0;
+      base.spread   = opts.spread != null ? opts.spread : 30;
+      base.speed    = opts.speed || 6;
+      base.shape    = opts.shape || 'triangle';
+      base.spinning = opts.spinning !== false;
+      base.invert   = !!opts.invert;
+      base.color1   = opts.color1 || '#ff6633';
+      base.color2   = opts.color2 || '#ffaa00';
+      base.color3   = opts.color3 || '#ff3366';
+      base.glow     = opts.glow || 'none';
+    }
+    return base;
   }
 
   // Default structural panes
@@ -1657,7 +1863,7 @@
       panes[5].hinge = 'bottom'; panes[5].angle = 135;
     },
     'Chest': function() {
-      shell = { bw: 510, bh: 193, bd: 114, persp: 352, rx: -30, ry: 0 };
+      shell = { bw: 510, bh: 193, bd: 114, persp: 352, rx: -28, ry: -5 };
       colors = { cDark: '#3d2b08', cLight: '#a87830', cFloor: '#1a1206', cCeil: '#5a4020', cGlow: '#ffc850' };
       _nextId = 1;
       // NOTE: ox/oy here are PRE-migration (old anchor semantics).
@@ -1669,17 +1875,23 @@
         makePane({ id: _nextId++, name: 'Right',  face: 'right',  structural: true, ox: 142 }),
         makePane({ id: _nextId++, name: 'Bottom', face: 'bottom', structural: true, oy: -19 }),
         makePane({ id: _nextId++, name: 'Lid',    face: 'top',    role: 'lid', hinge: 'top',
-                   pw: 507, ph: 225, ox: 1.5, oy: -14, oz: 0,
-                   angle: 135, hoverAngle: 25 }),
+                   pw: 510, ph: 230, ox: 0, oy: -8.5, oz: 0,
+                   angle: 135, hoverAngle: 25,
+                   box: { bd: 12, showBack: true, edgeColor: '#c6985d', edgeAlpha: null,
+                     children: [
+                       { pw: 504, ph: 225, ox: -2, oy: -2, oz: 10, color: '#a87830', alpha: 95,
+                         box: { bd: 60, showBack: true, edgeColor: '#8a5c20', edgeAlpha: null } }
+                     ]
+                   } }),
         makePane({ id: _nextId++, name: 'Front',  face: 'front',  structural: false, role: 'structure',
                    pw: 509, ph: 190, ox: 1.5, oy: 0.5 })
       ];
       glows = [
-        makeGlow({ name: 'Floor glow',    color: '#c850c6', size: 140, rotX: 90 }),
-        makeGlow({ name: 'Cross glow 1',  color: '#c850c6', size: 140, rotX: 86, rotY: -1 }),
-        makeGlow({ name: 'Cross glow 2',  color: '#c850c6', size: 140, rotY: 60 }),
-        makeGlow({ name: 'Cross glow 3',  color: '#c850c6', size: 140, rotY: 120 }),
-        makeGlow({ name: 'Item.glow',     color: '#ffc850', size: 140, rotY: 68,
+        makeGlow({ name: 'Floor glow',    color: '#c850c6', size: 140, rotX: 90, oy: 107 }),
+        makeGlow({ name: 'Cross glow 1',  color: '#c850c6', size: 140, rotX: 86, rotY: -1, oy: -104 }),
+        makeGlow({ name: 'Cross glow 2',  color: '#c850c6', size: 140, rotY: 25 }),
+        makeGlow({ name: 'Cross glow 3',  color: '#c850c6', size: 140, rotY: -23 }),
+        makeGlow({ name: 'Item.glow',     color: '#ffc850', size: 140, rotY: 68, alpha: 5,
                    child: {
                      text: '\uD83C\uDF92',
                      p1: { size: 0,   oy: -50, oz: 0,  alpha: 0,   rotX: 0,  rotY: 0 },
@@ -1730,23 +1942,44 @@
       };
     },
     'Single Door': function() {
-      shell = { bw: 390, bh: 586, bd: 46, persp: 502, rx: -11, ry: -15 };
+      shell = { bw: 390, bh: 586, bd: 46, persp: 502, rx: -12, ry: -21 };
       colors = { cDark: '#0a0a08', cLight: '#3a4030', cFloor: '#1a1812', cCeil: '#2a3020', cGlow: '#dcc8a0' };
       _nextId = 1;
+      // Pre-migration ox/oy values reverse-engineered from previewed export.
       panes = [
         makePane({ id: _nextId++, name: 'Back',       face: 'back',   structural: true, texture: 'hidden' }),
-        makePane({ id: _nextId++, name: 'Left',       face: 'left',   structural: true, ox: 164, oy: 7 }),
-        makePane({ id: _nextId++, name: 'Right',      face: 'right',  structural: true, ox: 165, oy: 5 }),
-        makePane({ id: _nextId++, name: 'Top',        face: 'top',    structural: true, ox: 14, oy: 252 }),
-        makePane({ id: _nextId++, name: 'Bottom',     face: 'bottom', structural: true, ox: 17, oy: 253 }),
+        makePane({ id: _nextId++, name: 'Left',       face: 'left',   structural: true, ox: 164, oy: 7,
+                   box: { bd: 2, showBack: true } }),
+        makePane({ id: _nextId++, name: 'Right',      face: 'right',  structural: true, ox: 149, oy: 5,
+                   box: { bd: 15, showBack: true } }),
+        makePane({ id: _nextId++, name: 'Top',        face: 'top',    structural: true, ox: 14, oy: 265.5,
+                   ph: 87, _phOverride: true,
+                   box: { bd: 15, showBack: true } }),
+        makePane({ id: _nextId++, name: 'Bottom',     face: 'bottom', structural: true, ox: 17, oy: 203,
+                   ph: 192, _phOverride: true,
+                   box: { bd: 2, showBack: true,
+                     children: [
+                       { pw: 390, ph: 79, ox: -10, oy: 0, oz: 9, alpha: 95 }
+                     ]
+                   } }),
         makePane({ id: _nextId++, name: 'Door Panel', face: 'front',  role: 'lid', hinge: 'left',
                    angle: 92, hoverAngle: 41, pw: 390, ph: 564, ox: 15, oy: 6,
-                   texture: 'wood-plank' })
+                   texture: 'wood-plank',
+                   box: { bd: 17, showBack: true,
+                     children: [
+                       { pw: 388, ph: 566, ox: 0, oy: 0, oz: 16, alpha: 95 }
+                     ]
+                   } })
       ];
       glows[0].ox = -9; glows[0].oy = 285; glows[0].color = '#ffc850'; glows[0].size = 140;
       glows[1].size = 140; glows[1].color = '#ffc850';
       glows[2].size = 89; glows[2].oy = 44; glows[2].oz = -127; glows[2].rotY = 60; glows[2].color = '#ffc850';
       glows[3].size = 82; glows[3].ox = 1; glows[3].oy = -4; glows[3].oz = -186; glows[3].rotY = 120; glows[3].color = '#ffc850';
+      phaseAnims = {
+        p1: { squish: 3, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+        p2: { squish: 5, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 },
+        p3: { squish: 8, bounce: 0, poke: 0, spin: 0, tilt: 0, glow: 0 }
+      };
     },
     'Double Doors': function() {
       shell = { bw: 600, bh: 570, bd: 46, persp: 800, rx: 5, ry: -7 };
@@ -1787,7 +2020,19 @@
         makePane({ id: _nextId++, name: 'Bottom',    face: 'bottom', structural: true, oy: -11 }),
         makePane({ id: _nextId++, name: 'Crate Lid', face: 'front',  role: 'lid', hinge: 'slide-right',
                    pw: 418, ph: 336, ox: -2, oy: 1, oz: 0,
-                   angle: 104, hoverAngle: 17, texture: 'wood-plank' })
+                   angle: 104, hoverAngle: 17, texture: 'wood-plank',
+                   box: { bd: 8, showBack: false, edgeColor: '#7a5a1a', edgeAlpha: 85,
+                     children: [
+                       { pw: 418, ph: 22, ox: 0, oy: -120, oz: 0, color: '#6a4a14', alpha: 95, texture: 'dark-wood',
+                         box: { bd: 5, showBack: false, edgeColor: '#5a3a0a', edgeAlpha: 80 } },
+                       { pw: 418, ph: 22, ox: 0, oy: -40,  oz: 0, color: '#6a4a14', alpha: 95, texture: 'dark-wood',
+                         box: { bd: 5, showBack: false, edgeColor: '#5a3a0a', edgeAlpha: 80 } },
+                       { pw: 418, ph: 22, ox: 0, oy: 40,   oz: 0, color: '#6a4a14', alpha: 95, texture: 'dark-wood',
+                         box: { bd: 5, showBack: false, edgeColor: '#5a3a0a', edgeAlpha: 80 } },
+                       { pw: 418, ph: 22, ox: 0, oy: 120,  oz: 0, color: '#6a4a14', alpha: 95, texture: 'dark-wood',
+                         box: { bd: 5, showBack: false, edgeColor: '#5a3a0a', edgeAlpha: 80 } }
+                     ]
+                   } })
       ];
       glows = [
         makeGlow({ name: 'Floor glow',   color: '#dcc8a0', size: 140, rotX: 90, oz: 119, oy: 164 }),
@@ -2074,6 +2319,408 @@
     var p = getPaneById(selectedPaneId);
     if (p) p.wiring = this.value;
   });
+
+  // ── Sub-box toggle (in pane-props) ──
+  document.getElementById('pp-box-toggle').addEventListener('click', function() {
+    var p = getPaneById(selectedPaneId);
+    if (!p) return;
+    pushUndo();
+    if (p.box) {
+      p.box = null;
+      // Clear sub-child selection if it pointed to this pane
+      if (_selectedSubChild && _selectedSubChild.paneId === p.id) _selectedSubChild = null;
+    } else {
+      // Scale default depth to ~10% of the smaller pane dimension (min 5, max 60)
+      var pw = p.structural ? getStructW(p) : p.pw;
+      var ph = p.structural ? getStructH(p) : p.ph;
+      var autoDepth = Math.max(5, Math.min(60, Math.round(Math.min(pw, ph) * 0.1)));
+      p.box = { bd: autoDepth, showBack: true, edgeColor: null, edgeAlpha: null, children: [] };
+      // Ensure panel is expanded
+      _subBoxCollapsed[p.id] = false;
+    }
+    syncBoxUI(p);
+    renderSubBoxPanels();
+    renderAttachmentPanels();
+    render();
+    // Auto-scroll sidebar to show the new sub-box panel
+    if (p.box) {
+      var panel = document.querySelector('.sub-box-section[data-pane-id="' + p.id + '"]');
+      if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+
+  function syncBoxUI(p) {
+    var hasBox = !!p.box;
+    var btn = document.getElementById('pp-box-toggle');
+    var hint = document.getElementById('pp-box-hint');
+    btn.textContent = hasBox ? 'On' : 'Off';
+    btn.style.color = hasBox ? '#cc88ff' : '#777';
+    btn.style.borderColor = hasBox ? '#7744aa' : '#2a2a3a';
+    if (hint) hint.style.display = hasBox ? 'block' : 'none';
+    // Attachment hint
+    var attachHint = document.getElementById('pp-attach-hint');
+    if (attachHint) attachHint.style.display = (p && p.attachments && p.attachments.length) ? 'block' : 'none';
+  }
+
+  // ── Attachment add handlers ──
+  function addAttachment(type) {
+    var p = getPaneById(selectedPaneId);
+    if (!p) return;
+    pushUndo();
+    if (!p.attachments) p.attachments = [];
+    var pw = p.structural ? getStructW(p) : p.pw;
+    var ph = p.structural ? getStructH(p) : p.ph;
+    var defaults = { type: type };
+    if (type === 'orb') {
+      defaults.size = Math.max(12, Math.round(Math.min(pw, ph) * 0.15));
+      defaults.oz = 5;
+    } else if (type === 'pyramid') {
+      defaults.size = Math.max(16, Math.round(Math.min(pw, ph) * 0.2));
+      defaults.oz = 5;
+    }
+    p.attachments.push(makeAttachment(defaults));
+    _attachCollapsed[p.attachments[p.attachments.length - 1].id] = false;
+    syncBoxUI(p);
+    renderSubBoxPanels();
+    renderAttachmentPanels();
+    render();
+    // Auto-scroll to new panel
+    var newId = p.attachments[p.attachments.length - 1].id;
+    var panel = document.querySelector('.attach-section[data-attach-id="' + newId + '"]');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  document.getElementById('pp-attach-orb').addEventListener('click', function() { addAttachment('orb'); });
+  document.getElementById('pp-attach-pyramid').addEventListener('click', function() { addAttachment('pyramid'); });
+
+  // ── Sub-box panels state ──
+  var _selectedSubChild = null;  // { paneId: N, childIdx: M } or null
+  var _subBoxCollapsed = {};     // paneId → true/false
+  var _attachCollapsed = {};     // attachmentId → true/false
+
+  // Texture options matching parent UI
+  var TEXTURE_OPTIONS = ['default','solid','wood-plank','dark-wood','metal','stone','hidden'];
+
+  function renderSubBoxPanels() {
+    var container = document.getElementById('sub-box-panels');
+    container.innerHTML = '';
+    var boxPanes = panes.filter(function(p) { return !!p.box; });
+    if (!boxPanes.length) return;
+
+    boxPanes.forEach(function(p) {
+      var box = p.box;
+      var isCollapsed = !!_subBoxCollapsed[p.id];
+      var sec = document.createElement('div');
+      sec.className = 'sub-box-section';
+      sec.setAttribute('data-pane-id', p.id);
+
+      // ── Header ──
+      var head = document.createElement('div');
+      head.className = 'sub-box-head' + (isCollapsed ? ' collapsed' : '');
+      head.innerHTML = '<span class="sb-chevron">&#9660;</span>' +
+        '<span class="sb-pane-name">\u2B21 ' + p.name + ' Sub-Box</span>' +
+        '<span class="sb-dims">' + (p.structural ? getStructW(p) : p.pw) + '\u00d7' + (p.structural ? getStructH(p) : p.ph) + '\u00d7' + (box.bd * 2) + '</span>';
+      head.addEventListener('click', function() {
+        _subBoxCollapsed[p.id] = !_subBoxCollapsed[p.id];
+        renderSubBoxPanels();
+      });
+      sec.appendChild(head);
+
+      if (isCollapsed) { container.appendChild(sec); return; }
+
+      var body = document.createElement('div');
+      body.className = 'sub-box-body';
+
+      // ── Sub-Shell section ──
+      var shellLabel = document.createElement('div');
+      shellLabel.className = 'sb-section-label';
+      shellLabel.textContent = 'Sub-Shell';
+      body.appendChild(shellLabel);
+
+      // Depth slider
+      var depthRow = _sbRow('Depth', 'range', box.bd, 2, 120, function(v) {
+        pushUndo(); box.bd = v; render();
+      });
+      body.appendChild(depthRow);
+
+      // Show back checkbox
+      var backRow = document.createElement('div');
+      backRow.className = 'cr';
+      backRow.innerHTML = '<label style="width:70px">Show Back</label>';
+      var backCb = document.createElement('input');
+      backCb.type = 'checkbox'; backCb.checked = box.showBack !== false;
+      backCb.style.margin = '0';
+      backCb.addEventListener('change', function() {
+        pushUndo(); box.showBack = this.checked; render();
+      });
+      backRow.appendChild(backCb);
+      body.appendChild(backRow);
+
+      // ── Sub-Colors section ──
+      var colorsLabel = document.createElement('div');
+      colorsLabel.className = 'sb-section-label';
+      colorsLabel.textContent = 'Sub-Colors';
+      body.appendChild(colorsLabel);
+
+      // Edge color
+      var ecRow = document.createElement('div');
+      ecRow.className = 'cr';
+      ecRow.innerHTML = '<label style="width:70px">Edge Color</label>';
+      var ecPick = document.createElement('input');
+      ecPick.type = 'color'; ecPick.value = box.edgeColor || p.color || colors.cLight;
+      ecPick.style.cssText = 'width:40px;height:18px;border:1px solid #3a3a5a;border-radius:3px;cursor:pointer';
+      ecPick.addEventListener('input', function() {
+        pushUndo(); box.edgeColor = this.value; render();
+      });
+      ecRow.appendChild(ecPick);
+      var eaLabel = document.createElement('label');
+      eaLabel.textContent = 'Alpha';
+      eaLabel.style.cssText = 'width:auto;margin-left:8px;color:#aa88cc;font-size:10px';
+      ecRow.appendChild(eaLabel);
+      var eaNum = document.createElement('input');
+      eaNum.type = 'number'; eaNum.className = 'num';
+      eaNum.value = box.edgeAlpha != null ? box.edgeAlpha : (p.alpha != null ? p.alpha : 100);
+      eaNum.min = 0; eaNum.max = 100; eaNum.style.width = '40px';
+      eaNum.addEventListener('input', function() {
+        pushUndo(); box.edgeAlpha = +this.value; render();
+      });
+      ecRow.appendChild(eaNum);
+      body.appendChild(ecRow);
+
+      // ── Sub-Panes section ──
+      var panesLabel = document.createElement('div');
+      panesLabel.className = 'sb-section-label';
+      panesLabel.textContent = 'Children (' + (box.children ? box.children.length : 0) + ')';
+      body.appendChild(panesLabel);
+
+      // Child list
+      var childList = document.createElement('div');
+      childList.className = 'sb-child-list';
+      if (box.children && box.children.length) {
+        box.children.forEach(function(child, ci) {
+          var item = document.createElement('div');
+          var isSel = _selectedSubChild && _selectedSubChild.paneId === p.id && _selectedSubChild.childIdx === ci;
+          item.className = 'sb-child-item' + (isSel ? ' selected' : '');
+          item.innerHTML =
+            '<span class="sci-color" style="background:' + (child.color || p.color || colors.cLight) + '"></span>' +
+            '<span class="sci-name">' + (child.name || ('Child ' + (ci + 1))) + '</span>' +
+            '<span class="sci-dims">' + child.pw + '\u00d7' + child.ph + (child.box ? ' \u2B21' : '') + '</span>' +
+            '<span class="sci-del">\u00d7</span>';
+          // Select child
+          item.addEventListener('click', function(e) {
+            if (e.target.classList.contains('sci-del')) return;
+            _selectedSubChild = { paneId: p.id, childIdx: ci };
+            renderSubBoxPanels();
+          });
+          // Delete child
+          item.querySelector('.sci-del').addEventListener('click', function() {
+            pushUndo();
+            box.children.splice(ci, 1);
+            if (_selectedSubChild && _selectedSubChild.paneId === p.id) {
+              if (_selectedSubChild.childIdx === ci) _selectedSubChild = null;
+              else if (_selectedSubChild.childIdx > ci) _selectedSubChild.childIdx--;
+            }
+            renderSubBoxPanels();
+            render();
+          });
+          childList.appendChild(item);
+        });
+      }
+      body.appendChild(childList);
+
+      // Add child button (styled)
+      var addBtn = document.createElement('button');
+      addBtn.className = 'sb-add-child';
+      addBtn.textContent = '+ Add Child';
+      addBtn.addEventListener('click', function() {
+        pushUndo();
+        if (!box.children) box.children = [];
+        var child = makePane({
+          name: 'Child ' + (box.children.length + 1),
+          face: 'front', structural: false, role: 'decor',
+          pw: Math.round(p.pw * 0.8), ph: 30,
+          ox: 0, oy: 0, oz: 0,
+          color: box.edgeColor || p.color || colors.cLight,
+          alpha: 95
+        });
+        box.children.push(child);
+        _selectedSubChild = { paneId: p.id, childIdx: box.children.length - 1 };
+        renderSubBoxPanels();
+        render();
+      });
+      body.appendChild(addBtn);
+
+      // ── Selected child properties ──
+      if (_selectedSubChild && _selectedSubChild.paneId === p.id) {
+        var ci = _selectedSubChild.childIdx;
+        var child = box.children[ci];
+        if (child) {
+          var cProps = document.createElement('div');
+          cProps.className = 'sb-child-props';
+          var cTitle = document.createElement('div');
+          cTitle.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px';
+          cTitle.innerHTML = '<span style="color:#aa88cc;font-size:9px;text-transform:uppercase;font-weight:600;letter-spacing:0.5px">Child:</span>';
+          var nameInp = document.createElement('input');
+          nameInp.type = 'text'; nameInp.value = child.name || '';
+          nameInp.style.cssText = 'flex:1;background:#222;color:#ddd;border:1px solid #444;border-radius:3px;padding:2px 5px;font-size:11px';
+          nameInp.addEventListener('input', function() {
+            child.name = this.value;
+            // Update the list item label live
+            var nameSpan = childList.children[ci] && childList.children[ci].querySelector('.sci-name');
+            if (nameSpan) nameSpan.textContent = this.value;
+          });
+          cTitle.appendChild(nameInp);
+          cProps.appendChild(cTitle);
+
+          // Width slider
+          cProps.appendChild(_sbRow('Width', 'range', child.pw, 10, 600, function(v) {
+            pushUndo(); child.pw = v; render(); _sbSyncDims(childList, ci, child);
+          }));
+          // Height slider
+          cProps.appendChild(_sbRow('Height', 'range', child.ph, 10, 700, function(v) {
+            pushUndo(); child.ph = v; render(); _sbSyncDims(childList, ci, child);
+          }));
+          // Offset X
+          cProps.appendChild(_sbRow('Offset X', 'range', child.ox || 0, -300, 300, function(v) {
+            pushUndo(); child.ox = v; render();
+          }));
+          // Offset Y
+          cProps.appendChild(_sbRow('Offset Y', 'range', child.oy || 0, -300, 300, function(v) {
+            pushUndo(); child.oy = v; render();
+          }));
+          // Offset Z
+          cProps.appendChild(_sbRow('Offset Z', 'range', child.oz || 0, -100, 100, function(v) {
+            pushUndo(); child.oz = v; render();
+          }));
+          // Color picker
+          var colorRow = document.createElement('div');
+          colorRow.className = 'cr';
+          colorRow.innerHTML = '<label style="width:70px">Color</label>';
+          var cPick = document.createElement('input');
+          cPick.type = 'color'; cPick.value = child.color || p.color || colors.cLight;
+          cPick.style.cssText = 'width:40px;height:18px;border:1px solid #3a3a5a;border-radius:3px;cursor:pointer';
+          cPick.addEventListener('input', function() {
+            pushUndo(); child.color = this.value; render();
+            var swatch = childList.children[ci] && childList.children[ci].querySelector('.sci-color');
+            if (swatch) swatch.style.background = this.value;
+          });
+          colorRow.appendChild(cPick);
+          // Alpha inline
+          var aLabel = document.createElement('label');
+          aLabel.textContent = 'Alpha';
+          aLabel.style.cssText = 'width:auto;margin-left:8px;color:#aa88cc;font-size:10px';
+          colorRow.appendChild(aLabel);
+          var aNum = document.createElement('input');
+          aNum.type = 'number'; aNum.className = 'num';
+          aNum.value = child.alpha != null ? child.alpha : 100;
+          aNum.min = 0; aNum.max = 100; aNum.style.width = '40px';
+          aNum.addEventListener('input', function() {
+            pushUndo(); child.alpha = +this.value; render();
+          });
+          colorRow.appendChild(aNum);
+          cProps.appendChild(colorRow);
+
+          // Texture dropdown
+          var texRow = document.createElement('div');
+          texRow.className = 'cr';
+          texRow.innerHTML = '<label style="width:70px">Texture</label>';
+          var texSel = document.createElement('select');
+          texSel.style.cssText = 'flex:1;background:#1a1a28;color:#88bbff;border:1px solid #3a3a5a;border-radius:3px;padding:1px 3px;font-size:10px';
+          TEXTURE_OPTIONS.forEach(function(t) {
+            var opt = document.createElement('option');
+            opt.value = t; opt.textContent = t;
+            if ((child.texture || 'default') === t) opt.selected = true;
+            texSel.appendChild(opt);
+          });
+          texSel.addEventListener('change', function() {
+            pushUndo(); child.texture = this.value; render();
+          });
+          texRow.appendChild(texSel);
+          cProps.appendChild(texRow);
+
+          // Sub-box toggle for child
+          var childBoxRow = document.createElement('div');
+          childBoxRow.className = 'cr';
+          childBoxRow.innerHTML = '<label style="width:70px">Sub-Box</label>';
+          var childBoxBtn = document.createElement('button');
+          childBoxBtn.textContent = child.box ? 'On' : 'Off';
+          childBoxBtn.style.cssText = 'padding:2px 10px;font-size:10px;font-weight:600;' +
+            'background:' + (child.box ? '#2a1e3e' : '#1a1a28') + ';' +
+            'color:' + (child.box ? '#cc88ff' : '#777') + ';' +
+            'border:1px solid ' + (child.box ? '#7744aa' : '#2a2a3a') + ';' +
+            'border-radius:4px;cursor:pointer';
+          childBoxBtn.addEventListener('click', function() {
+            pushUndo();
+            if (child.box) {
+              child.box = null;
+            } else {
+              child.box = { bd: 5, showBack: true, edgeColor: null, edgeAlpha: null, children: [] };
+            }
+            renderSubBoxPanels();
+            render();
+          });
+          childBoxRow.appendChild(childBoxBtn);
+          if (child.box) {
+            // Inline depth for child sub-box
+            var cbdLabel = document.createElement('label');
+            cbdLabel.textContent = 'Depth';
+            cbdLabel.style.cssText = 'width:auto;margin-left:8px;color:#aa88cc;font-size:10px';
+            childBoxRow.appendChild(cbdLabel);
+            var cbdNum = document.createElement('input');
+            cbdNum.type = 'number'; cbdNum.className = 'num';
+            cbdNum.value = child.box.bd; cbdNum.min = 1; cbdNum.max = 60;
+            cbdNum.style.width = '40px';
+            cbdNum.addEventListener('input', function() {
+              pushUndo(); child.box.bd = +this.value; render();
+            });
+            childBoxRow.appendChild(cbdNum);
+          }
+          cProps.appendChild(childBoxRow);
+
+          body.appendChild(cProps);
+        }
+      }
+
+      sec.appendChild(body);
+      container.appendChild(sec);
+    });
+  }
+
+  // Helper: create a slider+number row for sub-box panels
+  function _sbRow(label, type, value, min, max, onChange) {
+    var row = document.createElement('div');
+    row.className = 'cr';
+    var lab = document.createElement('label');
+    lab.textContent = label;
+    lab.style.width = '70px';
+    lab.style.color = '#aa88cc';
+    lab.style.fontSize = '10px';
+    row.appendChild(lab);
+    var slider = document.createElement('input');
+    slider.type = 'range'; slider.min = min; slider.max = max; slider.value = value;
+    slider.style.flex = '1';
+    row.appendChild(slider);
+    var num = document.createElement('input');
+    num.type = 'number'; num.className = 'num'; num.value = value;
+    num.min = min; num.max = max;
+    row.appendChild(num);
+    // Sync slider ↔ number
+    slider.addEventListener('input', function() {
+      num.value = this.value; onChange(+this.value);
+    });
+    num.addEventListener('input', function() {
+      slider.value = this.value; onChange(+this.value);
+    });
+    return row;
+  }
+
+  // Helper: update dims display in child list item
+  function _sbSyncDims(listEl, idx, child) {
+    var item = listEl.children[idx];
+    if (!item) return;
+    var dims = item.querySelector('.sci-dims');
+    if (dims) dims.textContent = child.pw + '\u00d7' + child.ph + (child.box ? ' \u2B21' : '');
+  }
 
   // Color inputs (shell)
   document.querySelectorAll('#sidebar .cr input[type="color"][data-p]').forEach(function(el) {
@@ -2691,6 +3338,283 @@
   });
 
   // ════════════════════════════════════════════════════
+  //  ATTACHMENT PANELS (sub-orbs, sub-pyramids on panes)
+  // ════════════════════════════════════════════════════
+
+  var _selectedAttachId = null;  // currently selected attachment ID
+
+  // Build the CSS transform string for an attachment from its current data
+  function _attachTransform(att) {
+    var sc = att.scale || 1;
+    var tfm = 'translate(' + (att.ox || 0) + 'px,' + (att.oy || 0) + 'px) translateZ(' + (att.oz || 0) + 'px)';
+    if (att.rotX) tfm += ' rotateX(' + att.rotX + 'deg)';
+    if (att.rotY) tfm += ' rotateY(' + att.rotY + 'deg)';
+    if (att.rotZ) tfm += ' rotateZ(' + att.rotZ + 'deg)';
+    if (sc !== 1) tfm += ' scale3d(' + sc + ',' + sc + ',' + sc + ')';
+    return tfm;
+  }
+
+  // Live-update an attachment's DOM without full render() rebuild.
+  // Finds the wrapper by data-attach-id and patches its transform + size.
+  // Returns true if patched, false if DOM element not found (needs full render).
+  function _patchAttachDOM(att, paneOwner) {
+    var el = bodyEl.querySelector('.pane-attachment[data-attach-id="' + att.id + '"]');
+    if (!el) return false;
+    el.style.transform = _attachTransform(att);
+    // Update size/position within pane
+    var pw = paneOwner.structural ? getStructW(paneOwner) : paneOwner.pw;
+    var ph = paneOwner.structural ? getStructH(paneOwner) : paneOwner.ph;
+    if (att.type === 'orb') {
+      var sz = att.size || 30;
+      el.style.width = sz + 'px';
+      el.style.height = sz + 'px';
+      el.style.left = ((pw - sz) / 2) + 'px';
+      el.style.top = ((ph - sz) / 2) + 'px';
+      el.style.animationDuration = (att.state === 'unlit') ? '20s' : (att.state === 'ember') ? '3s' : (att.speed || 8) + 's';
+      // Resize rings/slices
+      var rings = el.querySelectorAll('.wb-orb-ring');
+      for (var i = 0; i < rings.length; i++) { rings[i].style.width = sz + 'px'; rings[i].style.height = sz + 'px'; }
+      var slices = el.querySelectorAll('.wb-orb-slice');
+      for (var j = 0; j < slices.length; j++) { slices[j].style.width = sz + 'px'; slices[j].style.height = sz + 'px'; }
+    } else if (att.type === 'pyramid') {
+      var pyrSz = att.size || 40;
+      var pyrH = att.height > 0 ? att.height : pyrSz;
+      el.style.width = pyrSz + 'px';
+      el.style.height = pyrH + 'px';
+      el.style.left = ((pw - pyrSz) / 2) + 'px';
+      el.style.top = ((ph - pyrH) / 2) + 'px';
+    }
+    return true;
+  }
+
+  function renderAttachmentPanels() {
+    var container = document.getElementById('attach-panels');
+    container.innerHTML = '';
+    // Collect all panes that have attachments
+    var withAttach = panes.filter(function(p) { return p.attachments && p.attachments.length > 0; });
+    if (!withAttach.length) return;
+
+    withAttach.forEach(function(p) {
+      p.attachments.forEach(function(att, attIdx) {
+        var isCollapsed = !!_attachCollapsed[att.id];
+        var sec = document.createElement('div');
+        sec.className = 'attach-section';
+        sec.dataset.attachId = att.id;
+
+        // ── Header ──
+        var head = document.createElement('div');
+        head.className = 'attach-head' + (isCollapsed ? ' collapsed' : '');
+        head.innerHTML = '<span class="at-chevron">▼</span> ' +
+          '<span>' + p.name + '</span>' +
+          '<span class="at-type">' + att.type.toUpperCase() + '</span>' +
+          '<span class="at-delete" title="Remove attachment">✕</span>';
+        head.querySelector('.at-delete').addEventListener('click', function(e) {
+          e.stopPropagation();
+          pushUndo();
+          p.attachments.splice(attIdx, 1);
+          if (_selectedAttachId === att.id) _selectedAttachId = null;
+          syncBoxUI(p);
+          renderAttachmentPanels();
+          render();
+        });
+        head.addEventListener('click', function() {
+          _attachCollapsed[att.id] = !_attachCollapsed[att.id];
+          renderAttachmentPanels();
+        });
+        sec.appendChild(head);
+
+        // ── Body ──
+        var body = document.createElement('div');
+        body.className = 'attach-body' + (isCollapsed ? ' collapsed' : '');
+
+        // Common position controls
+        var ATTACH_SLIDERS = [
+          { key: 'ox',   label: 'Offset X', min: -300, max: 300 },
+          { key: 'oy',   label: 'Offset Y', min: -300, max: 300 },
+          { key: 'oz',   label: 'Offset Z', min: -200, max: 400 },
+          { key: 'rotX', label: 'Rotate X',  min: -180, max: 180 },
+          { key: 'rotY', label: 'Rotate Y',  min: -180, max: 180 },
+          { key: 'rotZ', label: 'Rotate Z',  min: -180, max: 180 },
+          { key: 'scale', label: 'Scale',    min: 10, max: 300, divisor: 100 }
+        ];
+
+        // Type-specific controls
+        var typeSliders = [];
+        if (att.type === 'orb') {
+          typeSliders = [
+            { key: 'size',   label: 'Orb Size',   min: 8, max: 300 },
+            { key: 'rings',  label: 'Rings',       min: 1, max: 12 },
+            { key: 'slices', label: 'Slices',      min: 1, max: 12 },
+            { key: 'speed',  label: 'Speed (s)',   min: 1, max: 30 }
+          ];
+        } else if (att.type === 'pyramid') {
+          typeSliders = [
+            { key: 'size',   label: 'Tri Size',    min: 8, max: 300 },
+            { key: 'height', label: 'Height',       min: 0, max: 300 },
+            { key: 'spread', label: 'Spread',       min: 0, max: 90 },
+            { key: 'speed',  label: 'Speed (s)',    min: 1, max: 30 }
+          ];
+        }
+
+        // Type-specific header
+        if (att.type === 'orb') {
+          var orbHead = document.createElement('div');
+          orbHead.style.cssText = 'font-size:9px;color:#bb8844;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;border-bottom:1px solid #3a2a1a;padding-bottom:3px';
+          orbHead.textContent = '☀ Orb Properties';
+          body.appendChild(orbHead);
+        } else if (att.type === 'pyramid') {
+          var pyrHead = document.createElement('div');
+          pyrHead.style.cssText = 'font-size:9px;color:#44aadd;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;border-bottom:1px solid #1a2a3a;padding-bottom:3px';
+          pyrHead.textContent = '△ Pyramid Properties';
+          body.appendChild(pyrHead);
+        }
+
+        // Type-specific sliders
+        // Keys that can be live-patched without DOM rebuild:
+        var PATCHABLE_KEYS = { size: true, speed: true };
+        typeSliders.forEach(function(sl) {
+          var cr = document.createElement('div');
+          cr.className = 'cr';
+          var lbl = document.createElement('label');
+          lbl.textContent = sl.label;
+          var range = document.createElement('input');
+          range.type = 'range';
+          range.min = sl.min; range.max = sl.max;
+          var dispVal = sl.divisor ? Math.round(att[sl.key] * sl.divisor) : att[sl.key];
+          range.value = dispVal;
+          var num = document.createElement('input');
+          num.type = 'number'; num.className = 'num';
+          num.value = dispVal;
+          function onSlide(v, slider) {
+            var val = sl.divisor ? +v / sl.divisor : +v;
+            att[slider.key] = val;
+            range.value = v; num.value = v;
+            if (PATCHABLE_KEYS[slider.key] && _patchAttachDOM(att, p)) return;
+            render();
+          }
+          range.addEventListener('input', function() { onSlide(this.value, sl); });
+          num.addEventListener('input', function() { onSlide(this.value, sl); });
+          cr.appendChild(lbl); cr.appendChild(range); cr.appendChild(num);
+          body.appendChild(cr);
+        });
+
+        // Orb-specific dropdowns
+        if (att.type === 'orb') {
+          // Palette
+          var palCr = document.createElement('div');
+          palCr.className = 'cr';
+          palCr.innerHTML = '<label>Palette</label>';
+          var palSel = document.createElement('select');
+          palSel.style.cssText = 'flex:1;background:#222;color:#ddd;border:1px solid #444;border-radius:3px;font-size:11px;padding:2px 4px';
+          Object.keys(ORB_PALETTES).forEach(function(k) {
+            var opt = document.createElement('option');
+            opt.value = k; opt.textContent = k;
+            if (k === att.palette) opt.selected = true;
+            palSel.appendChild(opt);
+          });
+          palSel.addEventListener('change', function() { att.palette = this.value; render(); });
+          palCr.appendChild(palSel);
+          body.appendChild(palCr);
+
+          // State
+          var stCr = document.createElement('div');
+          stCr.className = 'cr';
+          stCr.innerHTML = '<label>State</label>';
+          var stSel = document.createElement('select');
+          stSel.style.cssText = 'flex:1;background:#222;color:#ddd;border:1px solid #444;border-radius:3px;font-size:11px;padding:2px 4px';
+          ['lit','ember','unlit'].forEach(function(s) {
+            var opt = document.createElement('option');
+            opt.value = s; opt.textContent = s;
+            if (s === att.state) opt.selected = true;
+            stSel.appendChild(opt);
+          });
+          stSel.addEventListener('change', function() { att.state = this.value; render(); });
+          stCr.appendChild(stSel);
+          body.appendChild(stCr);
+        }
+
+        // Pyramid-specific controls
+        if (att.type === 'pyramid') {
+          // Shape
+          var shCr = document.createElement('div');
+          shCr.className = 'cr';
+          shCr.innerHTML = '<label>Shape</label>';
+          var shSel = document.createElement('select');
+          shSel.style.cssText = 'flex:1;background:#222;color:#ddd;border:1px solid #444;border-radius:3px;font-size:11px;padding:2px 4px';
+          Object.keys(PYR_SHAPES).forEach(function(k) {
+            var opt = document.createElement('option');
+            opt.value = k; opt.textContent = k;
+            if (k === att.shape) opt.selected = true;
+            shSel.appendChild(opt);
+          });
+          shSel.addEventListener('change', function() { att.shape = this.value; render(); });
+          shCr.appendChild(shSel);
+          body.appendChild(shCr);
+
+          // Colors
+          ['color1','color2','color3'].forEach(function(ck, ci) {
+            var colCr = document.createElement('div');
+            colCr.className = 'cr';
+            colCr.innerHTML = '<label>Color ' + (ci + 1) + '</label>';
+            var colIn = document.createElement('input');
+            colIn.type = 'color';
+            colIn.value = att[ck];
+            colIn.addEventListener('input', function() { att[ck] = this.value; render(); });
+            colCr.appendChild(colIn);
+            body.appendChild(colCr);
+          });
+
+          // Spinning toggle
+          var spinCr = document.createElement('div');
+          spinCr.className = 'cr';
+          spinCr.innerHTML = '<label>Spinning</label>';
+          var spinBtn = document.createElement('button');
+          spinBtn.textContent = att.spinning ? 'On' : 'Off';
+          spinBtn.style.cssText = 'padding:2px 10px;font-size:10px;background:#1a1a28;color:' + (att.spinning ? '#44bbff' : '#777') + ';border:1px solid ' + (att.spinning ? '#225577' : '#2a2a3a') + ';border-radius:3px;cursor:pointer';
+          spinBtn.addEventListener('click', function() { att.spinning = !att.spinning; renderAttachmentPanels(); render(); });
+          spinCr.appendChild(spinBtn);
+          body.appendChild(spinCr);
+        }
+
+        // Position header
+        var posHead = document.createElement('div');
+        posHead.style.cssText = 'font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:6px 0 4px;border-top:1px solid #2a2a2a;padding-top:4px';
+        posHead.textContent = 'Position on Pane';
+        body.appendChild(posHead);
+
+        // Position sliders — always live-patchable (no DOM structure change)
+        ATTACH_SLIDERS.forEach(function(sl) {
+          var cr = document.createElement('div');
+          cr.className = 'cr';
+          var lbl = document.createElement('label');
+          lbl.textContent = sl.label;
+          var range = document.createElement('input');
+          range.type = 'range';
+          range.min = sl.min; range.max = sl.max;
+          var dispVal = sl.divisor ? Math.round(att[sl.key] * sl.divisor) : att[sl.key];
+          range.value = dispVal;
+          var num = document.createElement('input');
+          num.type = 'number'; num.className = 'num';
+          num.value = dispVal;
+          function onSlide(v, slider) {
+            var val = sl.divisor ? +v / sl.divisor : +v;
+            att[slider.key] = val;
+            range.value = v; num.value = v;
+            if (!_patchAttachDOM(att, p)) render();  // fall back to full render if DOM not found
+          }
+          range.addEventListener('input', function() { onSlide(this.value, sl); });
+          num.addEventListener('input', function() { onSlide(this.value, sl); });
+          cr.appendChild(lbl); cr.appendChild(range); cr.appendChild(num);
+          body.appendChild(cr);
+        });
+
+        sec.appendChild(body);
+        container.appendChild(sec);
+      });
+    });
+  }
+
+  // ════════════════════════════════════════════════════
   //  PANE LIST
   // ════════════════════════════════════════════════════
 
@@ -2774,9 +3698,12 @@
     document.querySelector('[data-pp="color"]').value = p.color;
     document.querySelector('[data-pp="labelText"]').value = p.labelText || '';
     document.getElementById('pp-wiring').value = p.wiring || '';
+    syncBoxUI(p);
 
     updatePropVisibility(p);
     renderPaneList();
+    renderSubBoxPanels();
+    renderAttachmentPanels();
     render();
   }
 
@@ -2990,7 +3917,20 @@
     boxEl.classList.toggle('no-glow', !(pa.glow > 0));
 
     // Remove old rendered elements (panes, lids, orb, editable glows)
-    bodyEl.querySelectorAll('.pane3d, .lid-wrapper, .wb-orb, .wb-pyramid, .glow3d').forEach(function(el) { el.remove(); });
+    // Check if the orb can be fast-pathed before removing it
+    var _orbCanFastPath = false;
+    if (orbConfig && _orbLiveEl && _orbLiveEl.parentNode === bodyEl) {
+      var _ph = activeOrbPhase();
+      if (_ph) {
+        var _newStructKey = _ph.rings + '|' + _ph.slices + '|' + _ph.palette + '|' + _ph.state;
+        _orbCanFastPath = (_newStructKey === _orbStructKey);
+      }
+    }
+    bodyEl.querySelectorAll('.pane3d, .lid-wrapper, .wb-pyramid, .glow3d').forEach(function(el) { el.remove(); });
+    if (!_orbCanFastPath) {
+      bodyEl.querySelectorAll('.wb-orb').forEach(function(el) { el.remove(); });
+      _orbLiveEl = null; _orbStructKey = '';
+    }
 
     // Hide hardcoded glow planes if we have custom glows
     var hardcodedGlow = bodyEl.querySelector('.box3d-glow');
@@ -3053,6 +3993,200 @@
     var isOpen = currentState === 'opened';
     var isHover = currentState === 'hover';
 
+    // ── Sub-box edge rendering ──
+    // Creates edge face divs inside a pane to give it 3D depth.
+    // The parent pane acts as the "front" face; edges extend behind it.
+    // Uses the same getFaceTransform math with W=pw, H=ph, D=box.bd.
+    function renderSubBoxEdges(paneEl, p, pw, ph) {
+      if (!p.box) return;
+      // The pane needs preserve-3d so its edge children render in 3D space
+      paneEl.style.transformStyle = 'preserve-3d';
+      var bd = p.box.bd;
+      var ec = p.box.edgeColor || p.color || colors.cLight;
+      var ea = (p.box.edgeAlpha != null ? p.box.edgeAlpha : p.alpha) / 100;
+      var edgeBg = 'linear-gradient(to top, ' + darken(ec) + ', ' + ec + ')';
+      var EDGE_FACES = [
+        { face: 'back',   w: pw,     h: ph,     show: p.box.showBack !== false },
+        { face: 'left',   w: bd * 2, h: ph,     show: true },
+        { face: 'right',  w: bd * 2, h: ph,     show: true },
+        { face: 'top',    w: pw,     h: bd * 2,  show: true },
+        { face: 'bottom', w: pw,     h: bd * 2,  show: true }
+      ];
+      EDGE_FACES.forEach(function(ef) {
+        if (!ef.show) return;
+        var el = document.createElement('div');
+        el.className = 'sub-edge';
+        el.style.position = 'absolute';
+        el.style.width = ef.w + 'px';
+        el.style.height = ef.h + 'px';
+        el.style.background = edgeBg;
+        el.style.opacity = ea;
+        el.style.border = '1px solid rgba(255,255,255,0.08)';
+        el.style.pointerEvents = 'none';
+        el.style.transformStyle = 'preserve-3d';
+        // Center the edge within the pane, then apply face transform
+        el.style.left = ((pw - ef.w) / 2) + 'px';
+        el.style.top = ((ph - ef.h) / 2) + 'px';
+        el.style.transform = getFaceTransform(ef.face, pw, ph, bd, 0, 0, 0);
+        paneEl.appendChild(el);
+      });
+      // Render mounted children (sub-panes that ride on this pane's surface)
+      if (p.box.children && p.box.children.length) {
+        p.box.children.forEach(function(child) {
+          var cpw = child.pw, cph = child.ph;
+          var childEl = document.createElement('div');
+          childEl.className = 'sub-child';
+          childEl.style.position = 'absolute';
+          childEl.style.width = cpw + 'px';
+          childEl.style.height = cph + 'px';
+          childEl.style.background = getTextureBg(child);
+          childEl.style.opacity = (child.alpha || 100) / 100;
+          childEl.style.border = '1px solid rgba(255,255,255,0.08)';
+          childEl.style.pointerEvents = 'none';
+          childEl.style.transformStyle = 'preserve-3d';
+          // Children are positioned on the front surface of the parent pane
+          // ox/oy offset from center, oz pushes forward from the surface
+          childEl.style.left = ((pw - cpw) / 2) + 'px';
+          childEl.style.top = ((ph - cph) / 2) + 'px';
+          childEl.style.transform = 'translateZ(' + ((child.oz || 0) + 1) + 'px) translate(' + (child.ox || 0) + 'px,' + (child.oy || 0) + 'px)';
+          // If the child itself is a box, render its edges recursively (1 level)
+          if (child.box) {
+            renderSubBoxEdges(childEl, child, cpw, cph);
+          }
+          paneEl.appendChild(childEl);
+        });
+      }
+    }
+
+    // ── Render attachments (sub-orbs, sub-pyramids) as children of the pane element ──
+    // This ensures they inherit the pane's full transform chain (including lid hinge).
+    function renderPaneAttachments(paneEl, p, pw, ph) {
+      if (!p.attachments || !p.attachments.length) return;
+      paneEl.style.transformStyle = 'preserve-3d';
+
+      p.attachments.forEach(function(att) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'pane-attachment';
+        wrapper.dataset.attachId = att.id;
+        wrapper.style.position = 'absolute';
+        wrapper.style.pointerEvents = 'none';
+        wrapper.style.transformStyle = 'preserve-3d';
+
+        var tfm = _attachTransform(att);
+
+        if (att.type === 'orb') {
+          var orbSize = att.size || 30;
+          var orbPal = ORB_PALETTES[att.palette] || ORB_PALETTES.fire;
+          var orbRings = att.rings || 5;
+          var orbSlices = att.slices || 4;
+          var orbSpeed = att.speed || 8;
+          var orbState = att.state || 'lit';
+          var sliceOpacity = 1;
+          if (orbState === 'unlit') sliceOpacity = 0.7;
+          else if (orbState === 'ember') sliceOpacity = 0.9;
+
+          wrapper.style.width = orbSize + 'px';
+          wrapper.style.height = orbSize + 'px';
+          wrapper.style.left = ((pw - orbSize) / 2) + 'px';
+          wrapper.style.top = ((ph - orbSize) / 2) + 'px';
+          wrapper.style.transform = tfm;
+          wrapper.style.animation = 'wb-orb-spin ' + orbSpeed + 's linear infinite';
+
+          if (orbState === 'unlit') wrapper.style.animationDuration = '20s';
+          else if (orbState === 'ember') wrapper.style.animationDuration = '3s';
+
+          var ringStep = 180 / orbRings;
+          var sliceStep = 360 / orbSlices;
+
+          for (var r = 0; r < orbRings; r++) {
+            var ringEl = document.createElement('div');
+            ringEl.className = 'wb-orb-ring';
+            ringEl.style.width = orbSize + 'px';
+            ringEl.style.height = orbSize + 'px';
+            ringEl.style.transform = 'rotate(' + (r * ringStep) + 'deg)';
+            var bg = orbPal[r % orbPal.length];
+            for (var s = 0; s < orbSlices; s++) {
+              var sliceEl = document.createElement('div');
+              sliceEl.className = 'wb-orb-slice';
+              sliceEl.style.width = orbSize + 'px';
+              sliceEl.style.height = orbSize + 'px';
+              sliceEl.style.setProperty('--bg', bg);
+              sliceEl.style.background = bg;
+              sliceEl.style.transform = 'rotateY(' + (s * sliceStep) + 'deg)';
+              if (sliceOpacity < 1) sliceEl.style.opacity = sliceOpacity;
+              if (orbState === 'ember') {
+                sliceEl.style.animation = 'wb-orb-ember 0.8s ease-in-out infinite';
+                sliceEl.style.animationDelay = (r * 0.08 + s * 0.04) + 's';
+              } else if (orbState === 'unlit') {
+                sliceEl.style.animation = 'wb-orb-smoke 3s ease-in-out infinite';
+                sliceEl.style.animationDelay = (r * 0.15 + s * 0.1) + 's';
+              }
+              ringEl.appendChild(sliceEl);
+            }
+            wrapper.appendChild(ringEl);
+          }
+        } else if (att.type === 'pyramid') {
+          var pyrSize = att.size || 40;
+          var pyrH = att.height > 0 ? att.height : pyrSize;
+          var pyrClip = PYR_SHAPES[att.shape || 'triangle'] || PYR_SHAPES.triangle;
+          var pyrSpread = att.spread != null ? att.spread : 30;
+          var pyrSpeed = att.speed || 6;
+
+          wrapper.style.width = pyrSize + 'px';
+          wrapper.style.height = pyrH + 'px';
+          wrapper.style.left = ((pw - pyrSize) / 2) + 'px';
+          wrapper.style.top = ((ph - pyrH) / 2) + 'px';
+          wrapper.style.transform = tfm;
+          wrapper.style.perspective = '340px';
+
+          var pyrSpin = document.createElement('div');
+          pyrSpin.className = 'wb-pyramid-wrapper';
+          pyrSpin.style.width = '100%'; pyrSpin.style.height = '100%';
+          pyrSpin.style.position = 'absolute'; pyrSpin.style.top = '0'; pyrSpin.style.left = '0';
+          pyrSpin.style.transformStyle = 'preserve-3d';
+          if (att.spinning === false) {
+            pyrSpin.style.animation = 'none';
+            pyrSpin.style.transform = 'rotateX(-20deg)';
+          } else {
+            pyrSpin.style.setProperty('--pyr-speed', pyrSpeed + 's');
+          }
+
+          var facesParent = pyrSpin;
+          if (att.invert) {
+            var invertWrap = document.createElement('div');
+            invertWrap.style.cssText = 'width:100%;height:100%;transform-style:preserve-3d;transform:rotateZ(180deg);position:absolute;top:0;left:0;';
+            pyrSpin.appendChild(invertWrap);
+            facesParent = invertWrap;
+          }
+
+          var pyrColors = [att.color1, att.color2, att.color3];
+          var gradients = [
+            'conic-gradient(' + pyrColors[0] + ',' + pyrColors[0] + ',' + pyrColors[1] + ',' + pyrColors[1] + ')',
+            'conic-gradient(' + pyrColors[1] + ',' + pyrColors[1] + ',' + pyrColors[2] + ',' + pyrColors[2] + ')',
+            'conic-gradient(' + pyrColors[2] + ',' + pyrColors[2] + ',' + pyrColors[0] + ',' + pyrColors[0] + ')',
+            'conic-gradient(' + pyrColors[0] + ',' + pyrColors[1] + ',' + pyrColors[2] + ')'
+          ];
+          var rotations = [
+            'rotateY(90deg) rotateZ(-' + pyrSpread + 'deg)',
+            'rotateY(90deg) rotateZ(' + pyrSpread + 'deg)',
+            'rotateX(' + pyrSpread + 'deg)',
+            'rotateX(-' + pyrSpread + 'deg)'
+          ];
+          for (var fi = 0; fi < 4; fi++) {
+            var face = document.createElement('div');
+            face.style.cssText = 'position:absolute;width:100%;height:100%;transform-style:preserve-3d;' +
+              'clip-path:' + pyrClip + ';transform-origin:center top;' +
+              'background:' + gradients[fi] + ';' +
+              'transform:' + rotations[fi] + ';opacity:0.85;';
+            facesParent.appendChild(face);
+          }
+          wrapper.appendChild(pyrSpin);
+        }
+
+        paneEl.appendChild(wrapper);
+      });
+    }
+
     panes.forEach(function(p) {
       var pw = p.structural ? getStructW(p) : p.pw;
       var ph = p.structural ? getStructH(p) : p.ph;
@@ -3104,6 +4238,8 @@
         addLabels(paneEl, p, pw, ph);
         addPaneListeners(paneEl, p);
         applyPaneSpin(paneEl, p);
+        renderSubBoxEdges(paneEl, p, pw, ph);
+        renderPaneAttachments(paneEl, p, pw, ph);
 
         wrapper.appendChild(paneEl);
         bodyEl.appendChild(wrapper);
@@ -3125,6 +4261,8 @@
         addLabels(paneEl, p, pw, ph);
         addPaneListeners(paneEl, p);
         applyPaneSpin(paneEl, p);
+        renderSubBoxEdges(paneEl, p, pw, ph);
+        renderPaneAttachments(paneEl, p, pw, ph);
 
         bodyEl.appendChild(paneEl);
       }
@@ -3153,6 +4291,10 @@
     el.style.transformStyle = 'preserve-3d';
   }
 
+  // ── Orb fast-path: avoid full DOM rebuild when only position/size/speed changes ──
+  var _orbStructKey = '';  // structural signature: rings|slices|palette|state
+  var _orbLiveEl = null;   // reference to the live .wb-orb element in bodyEl
+
   function renderOrb(W, H, D) {
     // All phase-specific values now live in activeOrbPhase().
     // renderOrb just reads them directly — no phaseMode branching needed.
@@ -3164,28 +4306,56 @@
     var orbSize    = ph.size;
     var orbZ       = ph.z;
     var orbSpeed   = ph.speed;
+    var activeState = ph.state;
+    var pal = ORB_PALETTES[ph.palette] || ORB_PALETTES.fire;
+    var orbX = ph.x || 0;
+    var orbY = ph.y || 0;
+
+    // Structural signature — if unchanged, we can patch the existing element
+    var structKey = drawRings + '|' + drawSlices + '|' + ph.palette + '|' + activeState;
+
+    // ── Fast-path: patch existing orb if only position/size/speed changed ──
+    if (_orbLiveEl && _orbLiveEl.parentNode === bodyEl && structKey === _orbStructKey) {
+      _orbLiveEl.style.width = orbSize + 'px';
+      _orbLiveEl.style.height = orbSize + 'px';
+      _orbLiveEl.style.left = ((W - orbSize) / 2 + orbX) + 'px';
+      _orbLiveEl.style.top = ((H - orbSize) / 2 + orbY) + 'px';
+      _orbLiveEl.style.setProperty('--orb-speed', orbSpeed + 's');
+      _orbLiveEl.style.setProperty('--orb-z', orbZ + 'px');
+      // Resize all rings and slices to match new orbSize
+      var allRings = _orbLiveEl.querySelectorAll('.wb-orb-ring');
+      for (var ri = 0; ri < allRings.length; ri++) {
+        allRings[ri].style.width = orbSize + 'px';
+        allRings[ri].style.height = orbSize + 'px';
+      }
+      var allSlices = _orbLiveEl.querySelectorAll('.wb-orb-slice');
+      for (var si = 0; si < allSlices.length; si++) {
+        allSlices[si].style.width = orbSize + 'px';
+        allSlices[si].style.height = orbSize + 'px';
+      }
+      return;
+    }
+
+    // ── Full rebuild path ──
     // CRITICAL: Do NOT set opacity on orbEl — it has transform-style: preserve-3d.
     // Setting opacity != 1 on a preserve-3d element FLATTENS its 3D rendering context,
     // causing all children (rings/slices) to project into a 2D plane = flat disk.
     // Instead, we push opacity down to each individual slice.
     var sliceOpacity = 1;
-    var activeState = ph.state;
-    var pal = ORB_PALETTES[ph.palette] || ORB_PALETTES.fire;
-
-    // Opacity hint: unlit/ember phases slightly transparent (applied per-slice, NOT on orbEl)
     if (activeState === 'unlit') sliceOpacity = 0.7;
     else if (activeState === 'ember') sliceOpacity = 0.9;
-
-    var orbX = ph.x || 0;
 
     var orbEl = document.createElement('div');
     orbEl.className = 'wb-orb';
     orbEl.style.width = orbSize + 'px';
     orbEl.style.height = orbSize + 'px';
     orbEl.style.left = ((W - orbSize) / 2 + orbX) + 'px';
-    orbEl.style.top = ((H - orbSize) / 2 + (ph.y || 0)) + 'px';
+    orbEl.style.top = ((H - orbSize) / 2 + orbY) + 'px';
     orbEl.style.setProperty('--orb-speed', orbSpeed + 's');
+    orbEl.style.setProperty('--orb-z', orbZ + 'px');
     // NO orbEl.style.opacity — preserve-3d must not be flattened!
+    // translateZ is driven by --orb-z inside keyframes (wb-orb-spin, squish, bounce, poke)
+    // so the inline transform is only a fallback for when animation hasn't started yet.
     orbEl.style.transform = 'translateZ(' + orbZ + 'px)';
 
     // State: override animation for ember/unlit
@@ -3236,6 +4406,8 @@
     }
 
     bodyEl.appendChild(orbEl);
+    _orbStructKey = structKey;
+    _orbLiveEl = orbEl;
   }
 
   function renderPyramid(W, H, D) {
@@ -3535,6 +4707,95 @@
     var structs = panes.filter(function(p) { return p.structural && p.role !== 'lid'; });
     var extras = panes.filter(function(p) { return !p.structural && p.role !== 'lid'; });
 
+    // Helper: generate CSS for sub-box edge faces and mounted children
+    function emitSubBoxCSS(parentSel, p, pw, ph) {
+      if (!p.box) return '';
+      var out = '';
+      var bd = p.box.bd;
+      var ec = p.box.edgeColor || p.color || colors.cLight;
+      var ea = (p.box.edgeAlpha != null ? p.box.edgeAlpha : p.alpha) / 100;
+      var edgeBg = 'linear-gradient(to top, ' + darken(ec) + ', ' + ec + ')';
+      out += '/* Sub-box: depth ' + bd + 'px */\n';
+      out += parentSel + ' { transform-style: preserve-3d; }\n';
+      var EDGE_FACES = [
+        { face: 'back',   w: pw,     h: ph,     show: p.box.showBack !== false },
+        { face: 'left',   w: bd * 2, h: ph,     show: true },
+        { face: 'right',  w: bd * 2, h: ph,     show: true },
+        { face: 'top',    w: pw,     h: bd * 2,  show: true },
+        { face: 'bottom', w: pw,     h: bd * 2,  show: true }
+      ];
+      EDGE_FACES.forEach(function(ef) {
+        if (!ef.show) return;
+        var edgeSel = parentSel + ' > .sub-edge-' + ef.face;
+        var cl = (pw - ef.w) / 2, ct = (ph - ef.h) / 2;
+        out += edgeSel + ' {\n';
+        out += '  position: absolute; pointer-events: none;\n';
+        out += '  width: ' + ef.w + 'px; height: ' + ef.h + 'px;\n';
+        if (cl || ct) out += '  left: ' + cl + 'px; top: ' + ct + 'px;\n';
+        out += '  background: ' + edgeBg + ';\n';
+        if (ea < 1) out += '  opacity: ' + ea + ';\n';
+        out += '  border: 1px solid rgba(255,255,255,0.08);\n';
+        out += '  transform-style: preserve-3d;\n';
+        out += '  transform: ' + getFaceTransform(ef.face, pw, ph, bd, 0, 0, 0) + ';\n';
+        out += '}\n';
+      });
+      // Mounted children
+      if (p.box.children && p.box.children.length) {
+        p.box.children.forEach(function(child, ci) {
+          var cpw = child.pw, cph = child.ph;
+          var childSel = parentSel + ' > .sub-child-' + ci;
+          var cl = (pw - cpw) / 2, ct = (ph - cph) / 2;
+          out += childSel + ' {\n';
+          out += '  position: absolute; pointer-events: none;\n';
+          out += '  width: ' + cpw + 'px; height: ' + cph + 'px;\n';
+          if (cl || ct) out += '  left: ' + cl + 'px; top: ' + ct + 'px;\n';
+          out += '  background: ' + getTextureBg(child) + ';\n';
+          if ((child.alpha || 100) < 100) out += '  opacity: ' + ((child.alpha || 100) / 100) + ';\n';
+          out += '  border: 1px solid rgba(255,255,255,0.08);\n';
+          out += '  transform-style: preserve-3d;\n';
+          out += '  transform: translateZ(' + ((child.oz || 0) + 1) + 'px) translate(' + (child.ox || 0) + 'px,' + (child.oy || 0) + 'px);\n';
+          out += '}\n';
+          // Recursive sub-box for children that are also boxes
+          if (child.box) {
+            out += emitSubBoxCSS(childSel, child, cpw, cph);
+          }
+        });
+      }
+      return out;
+    }
+
+    // Emit CSS for pane attachments (sub-orbs, sub-pyramids)
+    function emitAttachCSS(parentSel, p, pw, ph) {
+      if (!p.attachments || !p.attachments.length) return '';
+      var out = '';
+      p.attachments.forEach(function(att, ai) {
+        var sel = parentSel + ' > .pane-attach-' + ai;
+        out += '/* Attachment: ' + att.type + ' (id ' + att.id + ') */\n';
+        out += sel + ' {\n';
+        out += '  position: absolute; pointer-events: none; transform-style: preserve-3d;\n';
+        var sc = att.scale || 1;
+        var tfm = 'translate(' + (att.ox || 0) + 'px,' + (att.oy || 0) + 'px) translateZ(' + (att.oz || 0) + 'px)';
+        if (att.rotX) tfm += ' rotateX(' + att.rotX + 'deg)';
+        if (att.rotY) tfm += ' rotateY(' + att.rotY + 'deg)';
+        if (att.rotZ) tfm += ' rotateZ(' + att.rotZ + 'deg)';
+        if (sc !== 1) tfm += ' scale3d(' + sc + ',' + sc + ',' + sc + ')';
+        if (att.type === 'orb') {
+          out += '  width: ' + att.size + 'px; height: ' + att.size + 'px;\n';
+          out += '  left: ' + ((pw - att.size) / 2) + 'px; top: ' + ((ph - att.size) / 2) + 'px;\n';
+          out += '  transform: ' + tfm + ';\n';
+          out += '  /* orb: ' + att.rings + ' rings × ' + att.slices + ' slices, palette:' + att.palette + ', state:' + att.state + ', speed:' + att.speed + 's */\n';
+        } else if (att.type === 'pyramid') {
+          var pyrH = att.height > 0 ? att.height : att.size;
+          out += '  width: ' + att.size + 'px; height: ' + pyrH + 'px;\n';
+          out += '  left: ' + ((pw - att.size) / 2) + 'px; top: ' + ((ph - pyrH) / 2) + 'px;\n';
+          out += '  transform: ' + tfm + ';\n';
+          out += '  /* pyramid: shape:' + att.shape + ', spread:' + att.spread + ', speed:' + att.speed + 's, colors:(' + att.color1 + ',' + att.color2 + ',' + att.color3 + ') */\n';
+        }
+        out += '}\n';
+      });
+      return out;
+    }
+
     var css = '/* === Variant: ' + name + ' (' + W + 'x' + H + ', depth ' + (D*2) + ') === */\n';
     css += '/* Generated by BoxForge v1.0 — ' + panes.length + ' panes (' + structs.length + ' struct, ' + lids.length + ' lid, ' + extras.length + ' extra) */\n\n';
 
@@ -3589,6 +4850,11 @@
       if (p.texture === 'hidden') css += '  display: none;\n';
       if (p.wiring) css += '  /* wiring: ' + p.wiring.replace(/\n/g, ' | ') + ' */\n';
       css += '}\n';
+      // Sub-box edges for structural panes
+      if (p.box) {
+        css += emitSubBoxCSS('.box3d-wrap.' + pf + '-variant .' + faceClass, p, pw, ph);
+      }
+      css += emitAttachCSS('.box3d-wrap.' + pf + '-variant .' + faceClass, p, pw, ph);
     });
 
     // Lids
@@ -3628,6 +4894,11 @@
       css += '.box3d-wrap.' + pf + '-variant.opened .box3d-lid' + lidSel + ' {\n';
       css += '  transform: ' + openTfm + ';\n';
       css += '}\n';
+      // Sub-box edges for lid panes
+      if (p.box) {
+        css += emitSubBoxCSS('.box3d-wrap.' + pf + '-variant .box3d-lid' + lidSel, p, pw, ph);
+      }
+      css += emitAttachCSS('.box3d-wrap.' + pf + '-variant .box3d-lid' + lidSel, p, pw, ph);
     });
 
     // Extra panes (non-structural, non-lid — includes decor and repurposed panes)
@@ -3664,6 +4935,11 @@
           css += '  to { transform: ' + tfm + ' rotateX(' + (p.spinX ? 360 : 0) + 'deg) rotateY(' + (p.spinY ? 360 : 0) + 'deg); }\n';
           css += '}\n';
         }
+        // Sub-box edges for extra panes
+        if (p.box) {
+          css += emitSubBoxCSS('.box3d-wrap.' + pf + '-variant .' + faceClass, p, pw, ph);
+        }
+        css += emitAttachCSS('.box3d-wrap.' + pf + '-variant .' + faceClass, p, pw, ph);
       });
     }
 
@@ -3984,19 +5260,45 @@
     var html = '';
     var _fc = {};
 
+    // Helper: generate sub-box edge + child DOM elements for a pane with box property
+    function subBoxHTML(p, indent) {
+      if (!p.box) return '';
+      var out = '';
+      var EDGES = ['back', 'left', 'right', 'top', 'bottom'];
+      EDGES.forEach(function(ef) {
+        if (ef === 'back' && p.box.showBack === false) return;
+        out += indent + '<div class="sub-edge-' + ef + '"></div>\n';
+      });
+      if (p.box.children && p.box.children.length) {
+        p.box.children.forEach(function(child, ci) {
+          var innerHTML = child.box ? '\n' + subBoxHTML(child, indent + '  ') + indent : '';
+          out += indent + '<div class="sub-child-' + ci + '">' + innerHTML + '</div>\n';
+        });
+      }
+      return out;
+    }
+
     // Structural panes
     if (structs.length) html += '          <!-- Structural panes (' + structs.length + ') -->\n';
     structs.forEach(function(p) {
       _fc[p.face] = (_fc[p.face] || 0) + 1;
       var cls = 'bf-' + p.face + (_fc[p.face] > 1 ? '-' + _fc[p.face] : '');
-      html += '          <div class="' + cls + '"></div>\n';
+      if (p.box) {
+        html += '          <div class="' + cls + '">\n' + subBoxHTML(p, '            ') + '          </div>\n';
+      } else {
+        html += '          <div class="' + cls + '"></div>\n';
+      }
     });
 
     // Lids
     if (lids.length) html += '          <!-- Lid (' + lids.length + ') -->\n';
     lids.forEach(function(p, i) {
       var lidSel = lids.length > 1 ? '--' + i : '';
-      html += '          <div class="box3d-lid-wrap' + lidSel + '"><div class="box3d-lid' + lidSel + '"></div></div>\n';
+      if (p.box) {
+        html += '          <div class="box3d-lid-wrap' + lidSel + '"><div class="box3d-lid' + lidSel + '">\n' + subBoxHTML(p, '            ') + '          </div></div>\n';
+      } else {
+        html += '          <div class="box3d-lid-wrap' + lidSel + '"><div class="box3d-lid' + lidSel + '"></div></div>\n';
+      }
     });
 
     // Extra panes
@@ -4004,7 +5306,11 @@
     extras.forEach(function(p) {
       _fc[p.face] = (_fc[p.face] || 0) + 1;
       var cls = 'bf-' + p.face + (_fc[p.face] > 1 ? '-' + _fc[p.face] : '');
-      html += '          <div class="' + cls + '"></div>\n';
+      if (p.box) {
+        html += '          <div class="' + cls + '">\n' + subBoxHTML(p, '            ') + '          </div>\n';
+      } else {
+        html += '          <div class="' + cls + '"></div>\n';
+      }
     });
 
     // Glow sources
@@ -4205,6 +5511,10 @@
       // Preserve override flags
       if (p._pwOverride) restored._pwOverride = true;
       if (p._phOverride) restored._phOverride = true;
+      // Track attachment IDs
+      if (restored.attachments) restored.attachments.forEach(function(a) {
+        if (a.id >= _nextId) _nextId = a.id + 1;
+      });
       return restored;
     });
     glows = snapshot.glows.map(function(g) { return makeGlow(g); });
@@ -4231,6 +5541,8 @@
     syncShellToUI();
     syncColorsToUI();
     renderPaneList();
+    renderSubBoxPanels();
+    renderAttachmentPanels();
     renderGlowList();
     syncOrbUI();
     syncPyrUI();
@@ -4294,6 +5606,10 @@
       var restored = makePane(p);
       restored.id = p.id;
       if (p.id >= _nextId) _nextId = p.id + 1;
+      // Track attachment IDs too
+      if (restored.attachments) restored.attachments.forEach(function(a) {
+        if (a.id >= _nextId) _nextId = a.id + 1;
+      });
       return restored;
     });
 
@@ -4362,6 +5678,8 @@
     syncColorsToUI();
     updateShellDirtyLabels();
     renderPaneList();
+    renderSubBoxPanels();
+    renderAttachmentPanels();
     renderGlowList();
     panePropsEl.classList.remove('visible');
     glowPropsEl.style.display = 'none';
@@ -5293,6 +6611,113 @@
       render();
     }
   });
+
+  // ════════════════════════════════════════════════════
+  //  CAMERA XYZ WIDGET
+  // ════════════════════════════════════════════════════
+  (function initCamWidget() {
+    var gizmo = document.getElementById('cam-gizmo');
+    var rxEl = document.querySelector('#cam-rx b');
+    var ryEl = document.querySelector('#cam-ry b');
+    var pfEl = document.querySelector('#cam-pf b');
+
+    // Update the gizmo axis lines + label positions to match current camera angle
+    function updateGizmo() {
+      var rx = shell.rx * Math.PI / 180;
+      var ry = shell.ry * Math.PI / 180;
+      // Axis endpoint projections (simplified 3D → 2D)
+      var axLen = 22;
+      var axes = [
+        { el: '.cam-axis-x', lel: '.cam-lx', dx: Math.cos(ry), dy: Math.sin(rx) * Math.sin(ry) },
+        { el: '.cam-axis-y', lel: '.cam-ly', dx: 0, dy: -Math.cos(rx) },
+        { el: '.cam-axis-z', lel: '.cam-lz', dx: -Math.sin(ry), dy: Math.sin(rx) * Math.cos(ry) }
+      ];
+      axes.forEach(function(a) {
+        var axEl = gizmo.querySelector(a.el);
+        var labEl = gizmo.querySelector(a.lel);
+        var angle = Math.atan2(a.dy, a.dx);
+        var len = Math.sqrt(a.dx * a.dx + a.dy * a.dy) * axLen;
+        axEl.style.width = Math.max(2, len) + 'px';
+        axEl.style.transform = 'rotate(' + angle + 'rad)';
+        // Label at axis tip
+        var tipX = 36 + a.dx * (axLen + 8);
+        var tipY = 36 + a.dy * (axLen + 8);
+        labEl.style.left = tipX + 'px';
+        labEl.style.top = tipY + 'px';
+        labEl.style.transform = 'translate(-50%,-50%)' + (len < 6 ? ' scale(0.7)' : '');
+        labEl.style.opacity = Math.max(0.3, len / axLen);
+      });
+      // Readout
+      rxEl.textContent = shell.rx;
+      ryEl.textContent = shell.ry;
+      pfEl.textContent = shell.persp;
+    }
+
+    // Drag to orbit
+    var dragging = false, dragStartX, dragStartY, dragStartRx, dragStartRy;
+    gizmo.addEventListener('mousedown', function(e) {
+      if (e.target.classList.contains('cam-label')) return; // let label click through
+      e.preventDefault();
+      dragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragStartRx = shell.rx;
+      dragStartRy = shell.ry;
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      var dx = e.clientX - dragStartX;
+      var dy = e.clientY - dragStartY;
+      var newRy = Math.max(-80, Math.min(80, dragStartRy + dx * 0.5));
+      var newRx = Math.max(-80, Math.min(80, dragStartRx - dy * 0.5));
+      shell.ry = Math.round(newRy);
+      shell.rx = Math.round(newRx);
+      // Sync sidebar sliders
+      document.querySelectorAll('[data-p="rx"]').forEach(function(el) { el.value = shell.rx; });
+      document.querySelectorAll('[data-p="ry"]').forEach(function(el) { el.value = shell.ry; });
+      updateGizmo();
+      render();
+    });
+    window.addEventListener('mouseup', function() {
+      if (dragging) { dragging = false; pushUndo(); }
+    });
+
+    // Mouse wheel on widget = adjust perspective
+    gizmo.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      var delta = e.deltaY > 0 ? 20 : -20;
+      shell.persp = Math.max(200, Math.min(2000, shell.persp + delta));
+      document.querySelectorAll('[data-p="persp"]').forEach(function(el) { el.value = shell.persp; });
+      updateGizmo();
+      render();
+    }, { passive: false });
+
+    // Axis label clicks → snap to orthographic views
+    gizmo.querySelectorAll('.cam-label').forEach(function(label) {
+      label.addEventListener('click', function(e) {
+        e.stopPropagation();
+        pushUndo();
+        var axis = this.dataset.axis;
+        if (axis === 'x') { shell.rx = 0; shell.ry = -90; }      // side view
+        else if (axis === 'y') { shell.rx = -90; shell.ry = 0; }  // top-down view
+        else if (axis === 'z') { shell.rx = 0; shell.ry = 0; }    // front view
+        document.querySelectorAll('[data-p="rx"]').forEach(function(el) { el.value = shell.rx; });
+        document.querySelectorAll('[data-p="ry"]').forEach(function(el) { el.value = shell.ry; });
+        updateGizmo();
+        render();
+      });
+    });
+
+    // Hook into render cycle — update gizmo after every render
+    var _origRender = render;
+    render = function() {
+      _origRender();
+      updateGizmo();
+    };
+
+    // Initial update
+    updateGizmo();
+  })();
 
   // ════════════════════════════════════════════════════
   //  RESOURCE / PERFORMANCE HUD
